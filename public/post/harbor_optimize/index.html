@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Harbor镜像构建流程优化 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="详细介绍优化Harbor官方的镜像构建过程，提高镜像的构建速度">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Harbor镜像构建流程优化</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-05-21T10:49:15">2019-05-21</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/docker" rel="category">docker</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">7 分钟</time>
+</div></div>
+		</header>
+
+  
+<div class="content post__content clearfix">
+			<p>以Harbor v1.4~v1.6之间的版本为例，详细分析其构建离线包的整个流程，然后结合当前的环境以及目标，去优化这个构建流程。
+在Harbor的整个构建流程中，涉及的技术知识点包括Shell、Python、Make(Makefile)、Go、Docker等，不要求对这些技术熟练精通，
+能看懂其中的相关命令即可。</p>
+
+<p>Make是Linux GNU中的一个命令工具，用于解释Makefile中的指令规则，开源项目(distribution、helm)通常用Makefile来描述了整个项目所有文件的编译顺序、编译规则。
+Harbor也不例外，使用两个Makefile来组织整个项目的编译构建工作。</p>
+
+<p>官方构建离线包的命令</p>
+
+<pre><code class="language-bash">make package_offline GOBUILDIMAGE=golang:1.7.3 COMPILETAG=compile_golangimage \
+CLARITYIMAGE=vmware/harbor-clarity-ui-builder:1.2.7 CLAIRFLAG=true
+</code></pre>
+
+<p>该make命令是基于项目根目录harbor下执行，一个make命令将整个构建流程组织起来，这个过程中又嵌入了子Makefile的执行。</p>
+
+<pre><code class="language-bash">$GOPATH/src/github.com/vmware/harbor/Makefile
+$GOPATH/src/github.com/vmware/harbor/make/photon/Makefile
+</code></pre>
+
+<p>在国内宿主机上构建命令成功执行一次的时间应该至少在15分钟左右，尤其是在机器上第一次构建耗时更长，如此耗时，很有必要去了解一下编译构建的逻辑原理。</p>
+
+<ul>
+<li>执行构建命令的宿主机能访问外网，还必须要能fanqian</li>
+<li>部分镜像的构建上下文范围过大，导致发送给Docker Daemon的文件数据过大</li>
+<li>部分镜像并未变动，重复构建</li>
+<li>依赖的第三方项目(如Clair、Registry)，从Google云下载二进制包或者github拉取源代码构建，速度过慢</li>
+<li>许多模块镜像具备很多相同的指令，未抽取做成通用的基础镜像</li>
+</ul>
+
+<p>首先看一下Makefile中ui、jobservice、Adminserver源码的编译，以ui为例：</p>
+
+<pre><code class="language-bash">@echo &quot;compiling binary for ui (golang image)...&quot;
+@echo $(GOBASEPATH)
+@echo $(GOBUILDPATH)
+@$(DOCKERCMD) run --rm -v $(BUILDPATH):$(GOBUILDPATH) -w $(GOBUILDPATH_UI) $(GOBUILDIMAGE) \
+$(GOIMAGEBUILD) -v -o $(GOBUILDMAKEPATH_UI)/$(UIBINARYNAME)
+@echo &quot;Done.&quot;
+</code></pre>
+
+<p>假如当前$GOPATH=/data/go_workspace，翻译之后的编译命令如下</p>
+
+<pre><code class="language-docker">docker run --rm -v /data/go_workspace/src/github.com/vmware/harbor:/go/src/github.com/vmware/harbor \
+-w /go/src/github.com/vmware/harbor/ui golang:1.7.3 /usr/local/go/bin/go build -v -o \
+/go/src/github.com/vmware/harbor/make/dev/ui/harbor_ui　
+</code></pre>
+
+<p>上面命令关联的几个目录如下</p>
+
+<pre><code class="language-bash">A=/go/src/github.com/vmware/harbor
+B=/go/src/github.com/vmware/harbor/ui
+C=/go/src/github.com/vmware/harbor/make/dev/ui/
+D=/data/go_workspace/src/github.com/vmware/harbor/make/dev/ui/harbor_ui
+</code></pre>
+
+<p>上面编译ui模块源码时，首先启动了一个容器，该容器运行的镜像就是golang:1.7.3，镜像tag也就是make命令中<code>GOBUILDIMAGE</code>指定的值。容器启动时，将宿主机上的
+源码目录harbor挂载到容器<code>A</code>目录，同时利用<code>-w</code>设定工作目录，编译ui时将工作目录设置为<code>B</code>，然后执行go build编译，将编译后生成的可执行文件harbor_ui输出到C目录，
+即宿主机目录<code>D</code>，go build命令退出时，则自动将volume删除，Adminserver、Jobservice源码编译也是这个过程，最后分别生成harbor-adminserver、harbor-jobservice，
+输出到各自对应的目录中。</p>
+
+<p>首次编译时，需要去拉取指定tag的golang镜像，这个镜像非常大，golang:1.7.3就将近700M，编译每个模块源码时都会先启动一个Docker容器，这样的优点不依赖宿主机
+的go环境，直接在容器中处理，缺点就是占用资源大，非常耗时。我们部署Harbor的机器，或者专门用来构建打包的机器肯定已经具备了go语言的编译环境，根本无须这种方式，
+直接基于宿主机设置的$GOPATH进行即可。</p>
+
+<pre><code class="language-bash">harbor_project=&quot;$GOPATH/src/github.com/vmware/harbor&quot;
+echo &quot;compiling binary for ui&quot;
+cd $harbor_project/src/ui
+go build -v -o ../../deploy/docker/ui/harbor_ui
+echo &quot;Done&quot;
+</code></pre>
+
+<p>编译源码生成可执行文件之后，看下其构建镜像过程，构建镜像过程都在子Makefile文件中。</p>
+
+<pre><code class="language-Makefile">_build_ui:  
+    @echo &quot;building ui container for photon...&quot;
+    $(DOCKERBUILD) -f $(DOCKERFILEPATH_UI)/$(DOCKERFILENAME_UI) -t $(DOCKERIMAGENAME_UI):$(VERSIONTAG) .
+    @echo &quot;Done.&quot;
+</code></pre>
+
+<p>$GOPATH=/data/go_workspace/，翻译出来的命令为</p>
+
+<pre><code class="language-go">docker build -f $GOPATH/src/github.com/vmware/harbor/make/photon/Dockerfile \
+-t vmware/harbor-ui:dev . 
+</code></pre>
+
+<p>上面docker build的构建上下文是当前根目录harbor，实际上构建UI镜像时需要的文件仅仅为可执行文件harbor_ui、脚本start.sh以及Dockerfile，
+无须将harbor目录下所有的文件发送给Docker Daemon，至少1GB以上，只需在构建镜像时新建一个子目录，将镜像构建需要的文件全部复制到此目录，进行构建即可。</p>
+
+<pre><code class="language-docker">docker build -f deploy/docker/ui/Dockerfile -t vmware/harbor-ui:$image_tag deploy/docker/ui
+</code></pre>
+
+<p>Harbor依赖的第三方组件包括Docker Registry、CoreOS的Clair、Helm Chartmuseum，构建这些组件镜像时都需要去外网获取二进制文件或者源代码。Registry与Clair都需要从
+google上下载官方打好的二进制包，而Chartmuseum基于github项目地址拉取源码本地构建，非常耗时，尤其国内网络，访问google超慢。</p>
+
+<pre><code class="language-Makefile">_build_clair:
+    @if [ &quot;$(CLAIRFLAG)&quot; = &quot;true&quot; ] ; then \
+        if [ &quot;$(BUILDBIN)&quot; != &quot;true&quot; ] ; then \
+            rm -rf $(DOCKERFILEPATH_CLAIR)/binary &amp;&amp; mkdir -p $(DOCKERFILEPATH_CLAIR)/binary &amp;&amp; \
+            $(call _get_binary, https://storage.googleapis.com/harbor-builds/bin/clair/release2.0-$(CLAIRVERSION)/clair, $(DOCKERFILEPATH_CLAIR)/binary/clair); \
+        else \
+            cd $(DOCKERFILEPATH_CLAIR) &amp;&amp; $(DOCKERFILEPATH_CLAIR)/builder $(CLAIRVERSION) &amp;&amp; cd - ; \
+        fi ; \
+        echo &quot;building clair container for photon...&quot; ; \
+        $(DOCKERBUILD) -f $(DOCKERFILEPATH_CLAIR)/$(DOCKERFILENAME_CLAIR) -t $(DOCKERIMAGENAME_CLAIR):$(CLAIRVERSION)-$(VERSIONTAG) . ; \
+        rm -rf $(DOCKERFILEPATH_CLAIR)/binary; \
+        echo &quot;Done.&quot; ; \
+    fi
+</code></pre>
+
+<p>这些依赖的第三方组件，我们可以自行通过github源码构建镜像，上传到我们自己的仓库中，将这些镜像的构建过程从Makefile中剔除。</p>
+
+<p>在harbor这个项目中，我们基本不会去修改自带的web ui页面模块，构建镜像时不用去生成前端js组件，把上一次生成的文件copy出来，当成源代码保存在harbor目录中即可，先
+看一下Makefile中是如何构建前端js模块的。</p>
+
+<pre><code class="language-Makefile">compile_clarity:
+    @echo &quot;compiling binary for clarity ui...&quot;
+    @if [ &quot;$(HTTPPROXY)&quot; != &quot;&quot; ] ; then \
+        $(DOCKERCMD) run --rm -v $(BUILDPATH)/src:$(CLARITYSEEDPATH) $(CLARITYIMAGE) $(SHELL) $(CLARITYBUILDSCRIPT) -p $(HTTPPROXY); \
+    else \
+        $(DOCKERCMD) run --rm -v $(BUILDPATH)/src:$(CLARITYSEEDPATH) $(CLARITYIMAGE) $(SHELL) $(CLARITYBUILDSCRIPT); \
+    fi
+    @echo &quot;Done.&quot;
+</code></pre>
+
+<p>实际执行的命令如下</p>
+
+<pre><code class="language-docker">docker run --rm -v $GOPATH/src/github.com/vmware/harbor/src:/harbor_src \
+vmware/harbor-clarity-ui-builder:1.2.7 /bin/bash /entrypoint.sh
+</code></pre>
+
+<p>启动一个运行harbor-clarity-ui-builder:1.2.7镜像的容器，执行entrypoint.sh脚本，主要采用的是angular构建打包，依赖包非常多，每次构建都需要从新下载，
+构建成功之后会生成几个js、css文件。</p>
+
+<pre><code class="language-bash">build.min.js  
+clarity-icons.min.css  
+clarity-icons.min.js  
+clarity-ui.min.css  c
+ustom-elements.min.js 
+mutationobserver.min.js 
+styles.css
+</code></pre>
+
+<p>只需将以上文件作为源码保存在项目下，下次构建镜像时直接利用。</p>
+
+<p>从各组件的Dockerfile指令看出，很多雷同，不需要每次都去下载那些依赖组件，可以在官方的基础上构建我们自己的基础镜像。
+官方构建ui模块的Dockerfile</p>
+
+<pre><code class="language-dockerfile">FROM vmware/photon:1.0
+
+RUN tdnf distro-sync -y || echo \
+    &amp;&amp; tdnf erase vim -y \
+    &amp;&amp; tdnf install sudo -y \
+    &amp;&amp; tdnf clean all \
+    &amp;&amp; groupadd -r -g 10000 harbor &amp;&amp; useradd --no-log-init -r -g 10000 -u 10000 harbor \
+    &amp;&amp; mkdir /harbor/
+
+HEALTHCHECK CMD curl -s -o /dev/null -w &quot;%{http_code}&quot; 127.0.0.1:8080/api/systeminfo|grep 200
+COPY ./make/dev/ui/harbor_ui ./src/favicon.ico ./make/photon/ui/start.sh ./VERSION /harbor/
+COPY ./src/ui/views /harbor/views
+COPY ./src/ui/static /harbor/static
+
+RUN chmod u+x /harbor/start.sh /harbor/harbor_ui
+WORKDIR /harbor/
+    
+ENTRYPOINT [&quot;/harbor/start.sh&quot;]
+</code></pre>
+
+<p>将安装vim、sudo等提取出来，做成基础镜像Dockerfile。</p>
+
+<pre><code class="language-Dockerfile">FROM vmware/photon:1.0
+
+MAINTAINER sunjinfu@163.com
+
+RUN tdnf distro-sync -y || echo \
+    &amp;&amp; tdnf erase vim -y \
+    &amp;&amp; tdnf install sudo -y \
+    &amp;&amp; tdnf clean all \
+    &amp;&amp; groupadd -r -g 10000 harbor &amp;&amp; useradd --no-log-init -r -g 10000 -u 10000 harbor \
+    &amp;&amp; mkdir /harbor/
+</code></pre>
+
+<p>构建基础镜像</p>
+
+<pre><code class="language-Docker">docker build -t xx.com/xx/harbor-photon:1.0
+</code></pre>
+
+<p>然后在基础镜像基础上构建UI、Adminserver、Jobservice等镜像</p>
+
+<pre><code class="language-Dockerfile">FROM xx.com/xx/harbor-photon:1.0
+ 
+MAINTAINER sunjinfu@163.com
+ 
+HEALTHCHECK CMD curl -s -o /dev/null -w &quot;%{http_code}&quot; 127.0.0.1:8080/api/systeminfo|grep 200
+COPY harbor_ui favicon.ico start.sh VERSION /harbor/
+COPY views /harbor/views
+COPY static /harbor/static
+ 
+RUN chmod u+x /harbor/start.sh /harbor/harbor_ui
+WORKDIR /harbor/
+ 
+ENTRYPOINT [&quot;/harbor/start.sh&quot;]
+</code></pre>
+
+<p>至此，整个构建流程差不多了，我们构建的镜像不再打包，直接上传到自己的镜像仓库即可，一个完整的构建shell脚本如下。</p>
+
+<pre><code class="language-bash">#!/bin/bash
+
+#author: sunjinfu
+#compile go binary, go version must be at least 1.7.3
+
+set -e
+if [ -n $GOPATH ]
+then
+    echo &quot;GOPATH is $GOPATH&quot;
+else
+    echo &quot;env GOPATH lost&quot;
+    exit 1
+fi
+harbor_project=&quot;$GOPATH/src/github.com/vmware/harbor&quot;
+echo &quot;harbor project root directory is $harbor_project&quot;
+if [ ! -d $harbor_project ]
+then
+    echo &quot;harbor project not exist&quot;
+    exit 1
+else
+    echo &quot;&quot;
+fi
+echo &quot;deploy args:&quot; $*
+image_tag=$1
+if [ ! -n &quot;$image_tag&quot; ]
+then
+    echo &quot;docker image tag is empty&quot;
+    exit 1
+else
+    echo &quot;docker image tag is $image_tag&quot;
+fi
+echo &quot;compiling binary for adminserver&quot;
+cd $harbor_project/src/adminserver
+go build -v -o ../../deploy/docker/adminserver/harbor_adminserver
+echo &quot;Done&quot;
+echo &quot;compiling binary for jobservice&quot;
+cd $harbor_project/src/jobservice
+go build -v -o ../../deploy/docker/jobservice/harbor_jobservice
+echo &quot;Done&quot;
+echo &quot;compiling binary for ui&quot;
+cd $harbor_project/src/ui
+go build -v -o ../../deploy/docker/ui/harbor_ui
+echo &quot;Done&quot;
+
+cd $harbor_project
+echo &quot;docker building adminserver image&quot;
+docker build -f deploy/docker/adminserver/Dockerfile -t xx.com/container/harbor-adminserver:$image_tag deploy/docker/adminserver
+echo &quot;Done&quot;
+echo &quot;docker building jobservice image&quot;
+docker build -f deploy/docker/jobservice/Dockerfile -t xx.com/container/harbor-jobservice:$image_tag deploy/docker/jobservice
+echo &quot;Done&quot;
+echo &quot;docker building ui image&quot;
+cp -r src/ui/static deploy/docker/ui
+cp -r src/ui/views deploy/docker/ui
+cp src/favicon.ico deploy/docker/ui
+cp VERSION deploy/docker/ui
+docker build -f deploy/docker/ui/Dockerfile -t xx.com/container/harbor-ui:$image_tag deploy/docker/ui
+echo &quot;Done&quot;
+
+docker login xx.com -u root -p 1234567890
+
+docker push xx.com/container/harbor-adminserver:$image_tag
+docker push xx.com/container/harbor-jobservice:$image_tag
+docker push xx.com/container/harbor-ui:$image_tag
+echo &quot;docker images push done&quot;
+
+echo &quot;cleaning start&quot;
+rm -rf deploy/docker/adminserver/harbor_adminserver
+rm -rf deploy/docker/jobservice/harbor_jobservice
+rm -rf deploy/docker/ui/harbor_ui
+#docker rmi xx.com/container/harbor-adminserver:$image_tag
+#docker rmi xx.com/container/harbor-jobservice:$image_tag
+#docker rmi xx.com/container/harbor-ui:$image_tag
+rm -rf deploy/docker/ui/views
+rm -rf deploy/docker/ui/static
+rm -rf deploy/docker/ui/VERSION
+rm -rf deploy/docker/ui/favicon.ico
+echo &quot;Done&quot;
+</code></pre>
+
+<p>基于已有仓库镜像打harbor离线安装包脚本</p>
+
+<pre><code class="language-bash">#!/bin/bash
+
+#author: sunjinfu
+
+set -e
+echo &quot;before execute this script, you should use correct user and login xx.com successfully.&quot;
+
+echo &quot;deploy args:&quot; $*
+image_tag=$1
+if [ ! -n &quot;$image_tag&quot; ]
+then
+    echo &quot;docker image tag is empty&quot;
+    exit 1
+else
+    echo &quot;docker image tag is $image_tag&quot;
+fi
+docker pull xx.com/container/harbor-config:$image_tag
+
+container_id=&quot;`docker create --name harbor-config xx.com/container/harbor-config:$image_tag`&quot;
+if [ ! -n &quot;$container_id&quot; ]
+then
+    echo &quot;docker container harbor-config create failed&quot;
+    exit 1
+else
+    echo &quot;docker container harbor-config id =&gt; $container_id&quot;
+fi
+volume_line=`docker inspect $container_id | grep &quot;/docker/volumes/&quot;`
+echo &quot;volume line =&gt; $volume_line&quot;
+volume_line_tmp=${volume_line#*/}
+volume_dir=/${volume_line_tmp:start:length-2}
+echo &quot;harbor-config container volume dir =&gt; $volume_dir&quot;
+if [ ! -n &quot;$volume_dir&quot; ]
+then
+    echo &quot;docker container harbor-config volume dir is empty&quot;
+    exit 1
+else
+    echo &quot;docker container harbor-config volume dir =&gt; $volume_dir&quot;
+fi
+
+harbor_package=harbor-offline-package
+mkdir $harbor_package
+cd $harbor_package
+cp -r $volume_dir/harbor .
+echo &quot;current dir =&gt; `pwd`&quot;
+echo &quot;pulling harbor docker images ...&quot;
+harbor_log=&quot;xx.com/container/harbor-log:stable&quot;
+harbor_nginx=&quot;xx.com/container/harbor-nginx:stable&quot;
+harbor_registry=&quot;xx.com/container/registry:latest&quot;
+harbor_postgresql=&quot;xx.com/container/postgresql:latest&quot;
+harbor_clair=&quot;xx.com/container/clair:v2.0.6&quot;
+harbor_adminserver=&quot;xx.com/container/harbor-adminserver:$image_tag&quot;
+harbor_ui=&quot;xx.com/container/harbor-ui:$image_tag&quot;
+harbor_jobservice=&quot;xx.com/container/harbor-jobservice:$image_tag&quot;
+
+docker pull $harbor_log
+docker pull $harbor_nginx
+docker pull $harbor_registry
+docker pull $harbor_postgresql
+docker pull $harbor_clair
+
+docker pull $harbor_adminserver
+docker pull $harbor_ui
+docker pull $harbor_jobservice
+
+echo &quot;Done&quot;
+
+harbor_image_filename=&quot;harbor.image_$image_tag.tar&quot;
+
+echo &quot;saving harbor docker images...&quot;
+docker save $harbor_log $harbor_nginx $harbor_registry $harbor_postgresql $harbor_clair $harbor_adminserver \
+        $harbor_ui $harbor_jobservice &gt; $harbor_image_filename
+gzip $harbor_image_filename
+echo &quot;harbor docker images save successfully&quot;
+
+echo &quot;building offline install package...&quot;
+
+harbor_image_gz=&quot;$harbor_image_filename.gz&quot;
+
+mv $harbor_image_filename.gz harbor
+
+sed -i &quot;s/\${version}/$image_tag/&quot; harbor/docker-compose.yml
+
+tar -zcvf harbor-offline-installer-$image_tag.tgz harbor
+
+echo &quot;Done&quot;
+
+rm -rf harbor
+docker rm -v $container_id
+
+echo &quot;harbor offline install package has build successfully in `pwd`&quot;
+echo &quot;you can copy harbor-offline-installer-$image_tag.tgz to other machine and install it!&quot;
+</code></pre>
+
+<p>离线包安装脚本</p>
+
+<pre><code class="language-bash">#!/bin/bash
+
+#author: sunjinfu
+
+set -e
+file_num=`ls -lrt | grep 'harbor-offline-installer-*.*.tgz'| wc -l`
+if [ $file_num -eq 0 ]
+then
+    echo &quot;current directory can not find any harbor offline install package&quot;
+    exit 1
+else
+    if [ $file_num -eq 1 ]
+    then
+        echo &quot;find harbor offline install package&quot;
+        ls | grep 'harbor-offline-installer-*.*.tgz'
+    else
+        echo &quot;find multi harbor offline install packages, please delete redundant packages&quot;
+        exit 1
+    fi
+fi
+
+echo &quot;start tar harbor offline install package&quot;
+tar -xvf harbor-offline-installer-*.*.tgz
+echo &quot;Done&quot;
+
+echo &quot;load harbor docker images, please wait some seconds...&quot;
+docker load -i harbor.image_*.*.tar.gz
+echo &quot;load harbor docker images successfully.&quot;
+
+chmod u+x harbor/prepare harbor/install.sh
+
+echo &quot;================================================================================================&quot;
+echo &quot;#harbor has init successfully, please enter in `pwd`/harbor to modify harbor.cfg.&quot;
+echo &quot;#when you complete harbor.cfg, please exec [./prepare] first, then [./install.sh] to install harbor.&quot;
+echo &quot;#if need image scan, please exec [./prepare --with-clair] first, then [./install.sh --with-clair].&quot;
+echo &quot;================================================================================================&quot;
+</code></pre>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/harbor/" rel="tag">harbor</a></li>
+		<li class="tags__item"><a class="tags__link btn" href="/tags/docker/" rel="tag">docker</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/harbor_base/">开源Harbor功能结构</a></li>
+	
+	<li><a href="/post/docker_login_process/">Docker Login执行流程与原理</a></li>
+	
+	<li><a href="/post/deploy_harbor_service/">部署企业级Harbor镜像仓库服务</a></li>
+	
+	<li><a href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+	
+	<li><a href="/post/docker_image_scan/">Docker镜像扫描原理</a></li>
+	
+	<li><a href="/post/docker_storage_driver/">Docker镜像存储结构与原理</a></li>
+	
+	<li><a href="/post/docker_container_image/">Docker容器与镜像结构</a></li>
+	
+	<li><a href="/post/docker_data/">Docker容器数据文件管理</a></li>
+	
+	<li><a href="/post/dockerfile/">Dockerfile详解以及高级技巧</a></li>
+	
+	<li><a href="/post/postgresql/">PostgreSQL命令行操作</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/harbor_base/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">开源Harbor功能结构</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/kubernetes_curl_apiserver/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">CURL探索Kubernetes API Server</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

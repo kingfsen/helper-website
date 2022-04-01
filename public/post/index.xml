@@ -1,0 +1,384 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Posts on </title>
+    <link>/post/</link>
+    <description>Recent content in Posts on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 19 Mar 2020 16:05:32 +0800</lastBuildDate>
+    
+	<atom:link href="/post/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>本地部署kubernetes.io官方网站</title>
+      <link>/post/kubernetes_io_deploy/</link>
+      <pubDate>Thu, 19 Mar 2020 16:05:32 +0800</pubDate>
+      
+      <guid>/post/kubernetes_io_deploy/</guid>
+      <description>在公司办公网访问kubernetes.io官方网站非常慢，为方便工作与学习，可以将其在本地进行部署，快速阅读。kubernetes.io项目git地址: https://github.com/kubernetes/website 。 许多开源技术文档均采用Markdown编写，docker、kubernetes也不例外，之后再采用网站生成器Hugo生成静态html进</description>
+    </item>
+    
+    <item>
+      <title>Java互斥锁ReentrantLock实现原理</title>
+      <link>/post/reentrantlock/</link>
+      <pubDate>Tue, 07 Jan 2020 11:43:39 +0800</pubDate>
+      
+      <guid>/post/reentrantlock/</guid>
+      <description>了解AQS实现原理之后，再来分析ReentrantLock代码就非常简单了，在学习互斥锁之前很有必要搞清楚可重入锁、公平锁、非公平锁几个概念。 什么是可重入锁？线程成功获取锁之后，可以多次进入临界区访问资源，ReentrantLock就是一种可重入锁，其可重入的实现依赖于AQS的父类AOS，</description>
+    </item>
+    
+    <item>
+      <title>Java同步器框架AQS与锁实现原理</title>
+      <link>/post/juc/</link>
+      <pubDate>Thu, 12 Dec 2019 11:43:39 +0800</pubDate>
+      
+      <guid>/post/juc/</guid>
+      <description>JUC是Java中并发控制的核心包，其中AQS是并发的基础核心类，类名全称AbstractQueuedSynchronizer，其父类是AbstractOwnableSynchronizer(AOS)， 用于存取获得独占锁的线程。Java中的ReentrantLock、CountDownLa</description>
+    </item>
+    
+    <item>
+      <title>Helm架构与中心化部署解决方案</title>
+      <link>/post/helm_design/</link>
+      <pubDate>Sun, 02 Jun 2019 13:05:32 +0800</pubDate>
+      
+      <guid>/post/helm_design/</guid>
+      <description>随着Google容器调度平台Kubernetes的开源，很多社区与项目逐渐涌现，Helm就是其中之一。Helm可以理解成是Kubernetes的包管理工具， 类似rpm与CentOS、dpkg与Debian的关系。在Helm中，安装包被称为Chart，Helm定义了包的文件结构以及语法规范，</description>
+    </item>
+    
+    <item>
+      <title>使用Golang部署gRPC服务</title>
+      <link>/post/grpc/</link>
+      <pubDate>Fri, 31 May 2019 16:51:12 +0800</pubDate>
+      
+      <guid>/post/grpc/</guid>
+      <description>gRPC与大多数RPC框架一样，通过定义一个服务Service，然后明确指定能够被远程调用的方法。gRPC默认使用Protocol Buffers作为接口定义语言以及消息传输格式， 当然也可以使用其它可替代的协议，关于Protocol Buffers的介绍请参考gRPC协议Protocol Buf</description>
+    </item>
+    
+    <item>
+      <title>gRPC协议Protocol Buffers</title>
+      <link>/post/protocol_buffers/</link>
+      <pubDate>Thu, 30 May 2019 16:39:50 +0800</pubDate>
+      
+      <guid>/post/protocol_buffers/</guid>
+      <description>Protocol Buffers是一种灵活、高效、自动序列化结构数据的协议，当前有两个版本，分别是proto2与proto3，两个版本的协议不能完全兼容。 proto3简化了协议使用，生成的协议使用代码支持更多的编程语言，如Java、C++、Python、Java、Lite、Ruby、JavaScript、</description>
+    </item>
+    
+    <item>
+      <title>CURL探索Kubernetes API Server</title>
+      <link>/post/kubernetes_curl_apiserver/</link>
+      <pubDate>Wed, 22 May 2019 19:30:52 +0800</pubDate>
+      
+      <guid>/post/kubernetes_curl_apiserver/</guid>
+      <description>在Kubernetes集群中，API Server是集群管理API的入口，由运行在Master节点上的一个名为kube-apiserver的进程提供的服务。 用户进入API可以通过kubectl、客户端库或者http rest，User 或者 Service Account可以被授权进入API。当一个请求到达AP</description>
+    </item>
+    
+    <item>
+      <title>Harbor镜像构建流程优化</title>
+      <link>/post/harbor_optimize/</link>
+      <pubDate>Tue, 21 May 2019 10:49:15 +0800</pubDate>
+      
+      <guid>/post/harbor_optimize/</guid>
+      <description>以Harbor v1.4~v1.6之间的版本为例，详细分析其构建离线包的整个流程，然后结合当前的环境以及目标，去优化这个构建流程。 在Harbor的整个构建流程中，涉及的技术知识点包括Shell、Python、Make(Makefile)、Go、Docker等，不要求对这些技术熟练精通， 能看懂</description>
+    </item>
+    
+    <item>
+      <title>开源Harbor功能结构</title>
+      <link>/post/harbor_base/</link>
+      <pubDate>Mon, 20 May 2019 14:18:25 +0800</pubDate>
+      
+      <guid>/post/harbor_base/</guid>
+      <description>在了解Harbor之前，有必要先了解一下Docker开源的Docker Registry，Registry就是用来存储管理Docker镜像的服务， 客户端可以向Registry发起镜像的上传、下拉等请求操作。Docker Registry服务早期是由Docker官方下的docker/regist</description>
+    </item>
+    
+    <item>
+      <title>Docker Login登录凭证安全存储</title>
+      <link>/post/docker_login_pass/</link>
+      <pubDate>Sat, 11 May 2019 14:10:54 +0800</pubDate>
+      
+      <guid>/post/docker_login_pass/</guid>
+      <description>Docker利用docker login命令来校验用户镜像仓库的登录凭证，实际并不是真正意义上的登录(Web Login)，仅仅是一种登录凭证的试探校验，如果用户名密码正确，Docker则会把用户名、密码 以及仓库域名等信息进行base64编码保存在Docker的配置文件中，在Linux中文件路</description>
+    </item>
+    
+    <item>
+      <title>Docker镜像扫描原理</title>
+      <link>/post/docker_image_scan/</link>
+      <pubDate>Sun, 05 May 2019 15:18:22 +0800</pubDate>
+      
+      <guid>/post/docker_image_scan/</guid>
+      <description>初次听说镜像扫描想必很多疑惑，因为不明白其中的处理过程与原理。以Windows为例，它的控制面板以及一些第三方安全软件(三六零等)总能展示当前系统已安装的软件包， 当然绿色解压版则无法探测，它们无非是读取了操作系统的一些系统资源文件。Linux系统也不例外，通过软件管理包rpm、dpkg等安</description>
+    </item>
+    
+    <item>
+      <title>Docker镜像扫描之CVE漏洞数据源</title>
+      <link>/post/cve/</link>
+      <pubDate>Tue, 30 Apr 2019 16:32:25 +0800</pubDate>
+      
+      <guid>/post/cve/</guid>
+      <description>CVE，全称Common Vulnerabilities and Exposures，指的是公共已知的网络漏洞缺陷，每个漏洞都会分配一个唯一的标志CVE ID(如CVE-2008-7220)， 漏洞的相关信息由CNA维护，各系统厂商暴露出的漏洞通过CVE-ID均可在CVE 社区跟踪查询。 既然要搭建自己的CVE数据库，我们需要知道的是</description>
+    </item>
+    
+    <item>
+      <title>Docker镜像存储结构与原理</title>
+      <link>/post/docker_storage_driver/</link>
+      <pubDate>Thu, 25 Apr 2019 14:21:03 +0800</pubDate>
+      
+      <guid>/post/docker_storage_driver/</guid>
+      <description>Docker容器镜像存在哪儿，怎么存放? Docker容器在运行的过程中，只有小部分的数据可能需要写到容器可写层，因为大部分场景下，我们可以通过Docker volumes来写数据， 但是某些场景下，就是需要往容器可写层写数据，这就是Docker存储驱动Storage Driver出现的原因，这些</description>
+    </item>
+    
+    <item>
+      <title>Docker容器与镜像结构</title>
+      <link>/post/docker_container_image/</link>
+      <pubDate>Sun, 21 Apr 2019 10:19:15 +0800</pubDate>
+      
+      <guid>/post/docker_container_image/</guid>
+      <description>容器与镜像概念 Docker镜像是由一系列的层(Layer)组成的，每一个层对应的都是Dockerfile文件中的一个指令，Dockerfile中指令的行数越多， 镜像的层就会越多，镜像的每一层都是只读的，除了可写的容器层(容器运行时添加的一层)，例如下面的这个Dockerfile。 FROM ubuntu:15.04 COPY . /app</description>
+    </item>
+    
+    <item>
+      <title>Docker容器数据文件管理</title>
+      <link>/post/docker_data/</link>
+      <pubDate>Fri, 19 Apr 2019 16:53:36 +0800</pubDate>
+      
+      <guid>/post/docker_data/</guid>
+      <description>在Docker容器内部创建的文件默认存储在可写的容器层，容易产生几个问题: 当容器不存在时，数据文件不能持久化，同时这些数据文件不方便在容器之外被其他进程使用。 当容器运行的时候容器可写层严重依赖宿主机，不能轻易移动这些数据文件到其他地方。 在容器层写数据文件需要存储驱动(storage driv</description>
+    </item>
+    
+    <item>
+      <title>Dockerfile详解以及高级技巧</title>
+      <link>/post/dockerfile/</link>
+      <pubDate>Sun, 07 Apr 2019 20:35:36 +0800</pubDate>
+      
+      <guid>/post/dockerfile/</guid>
+      <description>Docker是通过读取Dockerfile文件来自动构建镜像，Dockerfile其实就是一个包含了很多命令行指令的文本文件，通过这些指令来装配一个镜像。 要掌握Docker构建镜像的技巧，就必须首先了解Dockerfile的基本指令，下面先详细介绍Dockerfile中的一些常用指令。 基本</description>
+    </item>
+    
+    <item>
+      <title>PostgreSQL命令行操作</title>
+      <link>/post/postgresql/</link>
+      <pubDate>Tue, 02 Apr 2019 19:18:40 +0800</pubDate>
+      
+      <guid>/post/postgresql/</guid>
+      <description>PostgreSQL是一个功能强大的开源对象关系数据库管理系统(ORDBMS)，PostgreSQL(也称为Post-gress-Q-L)由PostgreSQL全球开发集团(全球志愿者团队)开发， 其源代码是免费提供的。但是在中国互联网的后端数据库中，PostgreSQL目前使用的比较少，大</description>
+    </item>
+    
+    <item>
+      <title>Hugo入门详细教程</title>
+      <link>/post/hugo_base/</link>
+      <pubDate>Sun, 31 Mar 2019 12:54:26 +0800</pubDate>
+      
+      <guid>/post/hugo_base/</guid>
+      <description>首先访问Github下载Hugo的应用程序，Hugo各版本release文件下载地址 https://github.com/gohugoio/hugo/releases ， windows请选择下载hugo_0.xx.0_Windows-64bit.zip。 下载完成止之后解压文件至D:\soft\hugo_0.54，然后把该路径添加到系统环境变量Path中，执行 hugo version 命令验证</description>
+    </item>
+    
+    <item>
+      <title>深入理解Go语言的基础概念</title>
+      <link>/post/go_base/</link>
+      <pubDate>Sat, 30 Mar 2019 13:48:07 +0800</pubDate>
+      
+      <guid>/post/go_base/</guid>
+      <description>这篇文章主要讲解一些go语言开发的入门知识，希望对准备入门学习Go语言的开发者有点帮助。我之前也一直用Java语言进行开发，后来迫于公司的相关容器项目， 就自学Go语言，一边学习一边完成工作。Go语言是Google开源的编程语言，众多开源项目kubernetes、docker、prometh</description>
+    </item>
+    
+    <item>
+      <title>kubernetes镜像拉取失败解决方法</title>
+      <link>/post/kubernetes_image_pull/</link>
+      <pubDate>Fri, 29 Mar 2019 10:17:45 +0800</pubDate>
+      
+      <guid>/post/kubernetes_image_pull/</guid>
+      <description>Docker Hub以及利用开源harbor项目搭建的镜像仓库服务，对于Docker Client发起的docker login、docker push、docker pull等命令都会做基本的用户认证， 最简单常用的认证方式就是Basic Auth，即在发起的http请求头中添加一个Authorization，</description>
+    </item>
+    
+    <item>
+      <title>网站一键分享插件Share.js</title>
+      <link>/post/share_js/</link>
+      <pubDate>Wed, 27 Mar 2019 23:02:17 +0800</pubDate>
+      
+      <guid>/post/share_js/</guid>
+      <description>一键分享功能是网站社交化的一个重要组件，当前发现一款使用非常简单的js插件，就是share.js，项目地址: https://github.com/overtrue/share.js 。 share.js使用非常简单，它可以通过参数配置自由控制展示哪些分享图标，同时它还可以自定义分享时的title以及icon。 如此简单的一个js组件，对于我这样的一个后端开发人员，</description>
+    </item>
+    
+    <item>
+      <title>开源评论系统isso</title>
+      <link>/post/isso/</link>
+      <pubDate>Wed, 27 Mar 2019 16:18:10 +0800</pubDate>
+      
+      <guid>/post/isso/</guid>
+      <description>评论功能是静态博客系统的一个特色，是阅读者交流学习的一种手段。当前国内外都开源出很多评论系统， 包括企业或者个人贡献的，但是很多评论系统临时开放出来，过一段时间则关闭停止服务，所以给自己的博客选择一款稳定 的评论系统非常重要。 对于静态博客来说，由于它缺失后台服务，所以用户的评论数据都是落地在第</description>
+    </item>
+    
+    <item>
+      <title>FutureTask原理分析</title>
+      <link>/post/futuretask/</link>
+      <pubDate>Mon, 25 Mar 2019 16:31:58 +0800</pubDate>
+      
+      <guid>/post/futuretask/</guid>
+      <description>Callable Runnable 在Java中可以通过继承Thread或者实现Runnable接口两种方式来创建多线程，这两种方式创建的线程执行完毕之后，我们无法获取执行结果， 除非通过共享变量或者线程通信方式(Q消息等)间接实现，Java在1.5之后可以通过Callable和Future接口在线程执行完毕之后获取执行结</description>
+    </item>
+    
+    <item>
+      <title>递归与非递归遍历二叉树</title>
+      <link>/post/tree_traverse/</link>
+      <pubDate>Sun, 24 Mar 2019 16:01:34 +0800</pubDate>
+      
+      <guid>/post/tree_traverse/</guid>
+      <description>二叉树的遍历有三种方法，分别是先序、中序、后序，先序遍历顺序为根、左、右，中序遍历顺序为左、根、右，后序遍历顺序为左、右、根。 遍历二叉树的方式又包括递归、非递归两种方式。 先序遍历结果：50、30、20、40、60 中序遍历结果：20、30、40、50、60 后序遍历结果：20、40、30、60</description>
+    </item>
+    
+    <item>
+      <title>二叉树</title>
+      <link>/post/binary_tree_base/</link>
+      <pubDate>Sat, 23 Mar 2019 09:55:45 +0800</pubDate>
+      
+      <guid>/post/binary_tree_base/</guid>
+      <description>先简单了解下有序数组和链表两种数据结构 有序数组 优点：用二分查找法可以在有序数组中快速查找特定的值，时间O(logN)，当然按顺序遍历也只是O(N) 缺点：插入或者删除，需要多次移动数据项，平均要移动N/2次，不适合发生很多插入或者删除操作的场景 链表 优点：链表的插入和删除都非常快，时间O(1)</description>
+    </item>
+    
+    <item>
+      <title>高效的静态网站生成器Hugo</title>
+      <link>/post/hugo_blog/</link>
+      <pubDate>Tue, 19 Mar 2019 20:05:49 +0800</pubDate>
+      
+      <guid>/post/hugo_blog/</guid>
+      <description>静态网站比较适用于博客、宣传、文档类的站点，比动态站点占用资源更小，访问速度更快。当前最流行的Wordpress博客系统功能很强大，插件也很丰富， 但是整体感觉很臃肿，占用资源也比较大，同时还需要部署一个MySQL数据库，国内有一些个人或者小团队研发了一些开源的轻量级博客，根本没什么吸引力。</description>
+    </item>
+    
+    <item>
+      <title>Helm Harbor</title>
+      <link>/post/helm_harbor/</link>
+      <pubDate>Tue, 19 Mar 2019 10:02:41 +0800</pubDate>
+      
+      <guid>/post/helm_harbor/</guid>
+      <description>chartmuseum chartmuseum是helm chart的仓库，它的存储层支持FileSystem以及各大云厂商的对象存储中间件， 默认支持阿里云的OSS、百度的BOS、Amazon S3、Microsoft Azure、Oracle、Openstack、Google等， 其他厂商需自行实现Storage的B</description>
+    </item>
+    
+    <item>
+      <title>字典树的应用与实现</title>
+      <link>/post/trie/</link>
+      <pubDate>Sat, 16 Mar 2019 19:00:11 +0800</pubDate>
+      
+      <guid>/post/trie/</guid>
+      <description>字典树又称为单词查找树或者前缀树，是一种用于快速检索的树形结构，比如小写字母词典数是一个26叉数，数字的字典树是一个10叉数。字典数的键并未保存在节点中，而是由节点在树中的位置决定的。 根节点一般对应空信息。字典树的优点是查询效率高，其核心思想是利用空间换时间，利用字符串的公共前缀来提高效率</description>
+    </item>
+    
+    <item>
+      <title>字符串的最小包含子串</title>
+      <link>/post/get_min_contains_sub_string/</link>
+      <pubDate>Sat, 16 Mar 2019 13:19:14 +0800</pubDate>
+      
+      <guid>/post/get_min_contains_sub_string/</guid>
+      <description>问题 给定字符串str1，str2，获取字符串str1中包含str2的最小字符子串。 str1=&amp;ldquo;abcde&amp;rdquo;, str2=&amp;ldquo;bd&amp;rdquo; -&amp;gt; bcd str1=&amp;ldquo;abcde&amp;rdquo;, str2=&amp;ldquo;cg&amp;rdquo; -&amp;gt; &amp;ldquo;&amp;rdquo; 思路 假定字符编码范围0~255 创建一个size为256的整形数组charCount，用来保存字符串str2所有字符的出现次数 整形变量match用来表示当前差几个字符未匹配 将str1、str2分</description>
+    </item>
+    
+    <item>
+      <title>判断两个单词是否为变形词</title>
+      <link>/post/check_deformation_word/</link>
+      <pubDate>Sat, 16 Mar 2019 11:29:21 +0800</pubDate>
+      
+      <guid>/post/check_deformation_word/</guid>
+      <description>问题 给定两个单词word1，word2，判断两个单词是否是变形词，即两个单词中的每个字符出现的次数一致。 word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;acbc&amp;rdquo;, 返回true word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;abbc&amp;rdquo;, 返回false word1=&amp;ldquo;abc&amp;rdquo;, word=&amp;ldquo;cba&amp;rdquo;, 返回true 思路 假定字符串的编码范围0~255。 新建一个size为256的int数组 分别将单词word1、word2转换为对应的字符数组word1C</description>
+    </item>
+    
+    <item>
+      <title>Docker Login执行流程与原理</title>
+      <link>/post/docker_login_process/</link>
+      <pubDate>Sat, 16 Mar 2019 08:54:16 +0800</pubDate>
+      
+      <guid>/post/docker_login_process/</guid>
+      <description>docker安装的时候已经同时安装了docker client，通过命令docker version即可查看客户端以及服务端的版本信息，通过执行命令docker version查看docker版本信息。docker最近暴露的runc漏洞CVE-2019-5736，企业环境请安装18.09.2以上</description>
+    </item>
+    
+    <item>
+      <title>Helm插件安装原理详解</title>
+      <link>/post/helm_plugin_install/</link>
+      <pubDate>Fri, 15 Mar 2019 16:40:22 +0800</pubDate>
+      
+      <guid>/post/helm_plugin_install/</guid>
+      <description>Helm是Kubernetes集群的安装包管理工具，它与Kubernetes的关系类似于RPM与Centos。Helm提供了安装插件方式去扩展其核心功能，插件主要在客户端执行，并且存放在$HELM_HOME的plugins目录中。 Helm的插件安装源可以支持多种形式，Helm插件是以plu</description>
+    </item>
+    
+    <item>
+      <title>Prometheus监控Kubernetes服务(二)</title>
+      <link>/post/prometheus_monitor_k8s2/</link>
+      <pubDate>Fri, 15 Mar 2019 09:48:52 +0800</pubDate>
+      
+      <guid>/post/prometheus_monitor_k8s2/</guid>
+      <description>prometheus相关的服务已经在kubernetes中部署完成，请参阅文章 Prometheus监控Kubernetes服务(一) 。 Prometheus Label Label在prometheus服务抓取中非常重要，通过标签重写或者标签过滤抓取目标等是非常强大的功能。除了目标本身自定义的标签，prometheus还</description>
+    </item>
+    
+    <item>
+      <title>寻找字符串中不重复最长子串</title>
+      <link>/post/get_max_unique_sub_string/</link>
+      <pubDate>Thu, 14 Mar 2019 15:32:46 +0800</pubDate>
+      
+      <guid>/post/get_max_unique_sub_string/</guid>
+      <description>问题 给定一个字符串，找出这个字符串中最长的不重复子串。假定字符串编码范围在256之内(排除中文等特殊字符)，同时如果有相同长度的子串，优先获取首次寻找的子串，时间复杂度O(N)。 &amp;ldquo;abcd&amp;rdquo; -&amp;gt; &amp;ldquo;abcd&amp;rdquo; &amp;ldquo;abccd&amp;rdquo; -&amp;gt; &amp;ldquo;abc&amp;rdquo; &amp;ldquo;somok39ebab3yuvwz123&amp;rdquo; -&amp;gt; &amp;ldquo;ab3yuvwz12&amp;rdquo; 思路 用一个int数组position保存每个字符在字符串中的位置 用一个int变量mark标记下</description>
+    </item>
+    
+    <item>
+      <title>从数组中获取指定数量的随机元素</title>
+      <link>/post/get_random_number_from_array/</link>
+      <pubDate>Wed, 13 Mar 2019 20:41:18 +0800</pubDate>
+      
+      <guid>/post/get_random_number_from_array/</guid>
+      <description>问题 从给定的一个整型数组中，随机获取指定数量的数组元素。 思路一 新建一个与整型数组相同长度的boolean类型数组用来做标志位，标志位值为true表示当前元素是否已经获取，如果数组元素未被获取，则取出该元素，同时把对应的标志位置位true，如果发现当前元素已经获取，则重新随机获取。 public static int[] get(int[] array,</description>
+    </item>
+    
+    <item>
+      <title>Prometheus监控Kubernetes服务(一)</title>
+      <link>/post/prometheus_monitor_k8s/</link>
+      <pubDate>Wed, 13 Mar 2019 10:29:13 +0800</pubDate>
+      
+      <guid>/post/prometheus_monitor_k8s/</guid>
+      <description>Prometheus功能结构 Prometheus是基于golang编写的一个开源监控项目，当前应用非常广泛，尤其是与当前的容器调度平台kubernetes融合，使用Prometheus之前，我们应该了解下它的使用场景，它不能用来进行大量无规则数据的收集，不能替代日志收集工具，同时由于Pro</description>
+    </item>
+    
+    <item>
+      <title>基于Docker快速搭建wordpress博客</title>
+      <link>/post/docker_deploy_wordpress/</link>
+      <pubDate>Wed, 13 Mar 2019 10:28:01 +0800</pubDate>
+      
+      <guid>/post/docker_deploy_wordpress/</guid>
+      <description>wordpress数据存储依赖mysql数据库，以docker容器方式部署完整的wordpress博客服务，则需要从镜像仓库拉取mysql、wordpress镜像，这里选择从开源的docker hub 获取mysql 5.7版本，wordpress latest版本，同时需要准备一台具备外网环境的机器</description>
+    </item>
+    
+    <item>
+      <title>Harbor仓库镜像扫描原理</title>
+      <link>/post/harbor_image_scan/</link>
+      <pubDate>Mon, 11 Mar 2019 15:59:41 +0000</pubDate>
+      
+      <guid>/post/harbor_image_scan/</guid>
+      <description>初次听说镜像扫描的人肯定有很多疑惑，总会想原理是什么呢？我们可以先思考下，windows控制面板、包括一些第三方软件比如三六零等，它们都能获取系统安装的软件以及版本，当然绿色解压版他们就无法识别，获取软件版本之后，他们就能提供一些升级的版本、以及当前软件版本的漏洞列举出来，由此可见，系统安</description>
+    </item>
+    
+    <item>
+      <title>基于数据库的简单Leader Elect</title>
+      <link>/post/leader_elect_golang/</link>
+      <pubDate>Mon, 11 Mar 2019 15:14:25 +0800</pubDate>
+      
+      <guid>/post/leader_elect_golang/</guid>
+      <description>某个系统只用来执行定时任务，如果只部署单台服务，那么又容易单点故障，如果部署多台服务，又如何只保证每次只会其中一台去执行呢，在这里，可以对N台服务，做一个简单的leader elect，成为leader的实例才可以去执行定时任务。虽然当前出现很多开源的leader选举组件，比如zookeep</description>
+    </item>
+    
+    <item>
+      <title>部署企业级Harbor镜像仓库服务</title>
+      <link>/post/deploy_harbor_service/</link>
+      <pubDate>Mon, 11 Mar 2019 15:14:25 +0800</pubDate>
+      
+      <guid>/post/deploy_harbor_service/</guid>
+      <description>harbor初期版本1.4是在vmware旗下，当前已经成立了新项目goharbor。并且1.6.0版本之后进行了重构，数据库由mysql转换到postgresql，部分表结构也稍微改变了，代码也增强了很多，同时新增了helm chartmuseum仓库功能。对于harbor这个项目，可能有</description>
+    </item>
+    
+    <item>
+      <title>破解联通HG8347R光猫</title>
+      <link>/post/unicom_cat/</link>
+      <pubDate>Fri, 26 Oct 2018 08:41:19 +0800</pubDate>
+      
+      <guid>/post/unicom_cat/</guid>
+      <description>安装的联通宽带，自带光猫设备，型号为HG8347R，光猫后面可以清楚的看见这个设备是华为生产的，联通定制版本。 后台管理页面基本只有设备重启这个功能了，其他所有的功能都被屏蔽，无法操作，这个自带的光猫有一些限制。 不支持5G 只有LAN1口是千兆口 穿透能力、信号很弱 强制路由拨号，联通限制一个宽带</description>
+    </item>
+    
+  </channel>
+</rss>

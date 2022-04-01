@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>docker on </title>
+    <link>/tags/docker/</link>
+    <description>Recent content in docker on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 21 May 2019 10:49:15 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/docker/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Harbor镜像构建流程优化</title>
+      <link>/post/harbor_optimize/</link>
+      <pubDate>Tue, 21 May 2019 10:49:15 +0800</pubDate>
+      
+      <guid>/post/harbor_optimize/</guid>
+      <description>以Harbor v1.4~v1.6之间的版本为例，详细分析其构建离线包的整个流程，然后结合当前的环境以及目标，去优化这个构建流程。 在Harbor的整个构建流程中，涉及的技术知识点包括Shell、Python、Make(Makefile)、Go、Docker等，不要求对这些技术熟练精通， 能看懂</description>
+    </item>
+    
+    <item>
+      <title>开源Harbor功能结构</title>
+      <link>/post/harbor_base/</link>
+      <pubDate>Mon, 20 May 2019 14:18:25 +0800</pubDate>
+      
+      <guid>/post/harbor_base/</guid>
+      <description>在了解Harbor之前，有必要先了解一下Docker开源的Docker Registry，Registry就是用来存储管理Docker镜像的服务， 客户端可以向Registry发起镜像的上传、下拉等请求操作。Docker Registry服务早期是由Docker官方下的docker/regist</description>
+    </item>
+    
+    <item>
+      <title>Docker Login登录凭证安全存储</title>
+      <link>/post/docker_login_pass/</link>
+      <pubDate>Sat, 11 May 2019 14:10:54 +0800</pubDate>
+      
+      <guid>/post/docker_login_pass/</guid>
+      <description>Docker利用docker login命令来校验用户镜像仓库的登录凭证，实际并不是真正意义上的登录(Web Login)，仅仅是一种登录凭证的试探校验，如果用户名密码正确，Docker则会把用户名、密码 以及仓库域名等信息进行base64编码保存在Docker的配置文件中，在Linux中文件路</description>
+    </item>
+    
+    <item>
+      <title>Docker镜像扫描原理</title>
+      <link>/post/docker_image_scan/</link>
+      <pubDate>Sun, 05 May 2019 15:18:22 +0800</pubDate>
+      
+      <guid>/post/docker_image_scan/</guid>
+      <description>初次听说镜像扫描想必很多疑惑，因为不明白其中的处理过程与原理。以Windows为例，它的控制面板以及一些第三方安全软件(三六零等)总能展示当前系统已安装的软件包， 当然绿色解压版则无法探测，它们无非是读取了操作系统的一些系统资源文件。Linux系统也不例外，通过软件管理包rpm、dpkg等安</description>
+    </item>
+    
+    <item>
+      <title>Docker镜像存储结构与原理</title>
+      <link>/post/docker_storage_driver/</link>
+      <pubDate>Thu, 25 Apr 2019 14:21:03 +0800</pubDate>
+      
+      <guid>/post/docker_storage_driver/</guid>
+      <description>Docker容器镜像存在哪儿，怎么存放? Docker容器在运行的过程中，只有小部分的数据可能需要写到容器可写层，因为大部分场景下，我们可以通过Docker volumes来写数据， 但是某些场景下，就是需要往容器可写层写数据，这就是Docker存储驱动Storage Driver出现的原因，这些</description>
+    </item>
+    
+    <item>
+      <title>Docker容器与镜像结构</title>
+      <link>/post/docker_container_image/</link>
+      <pubDate>Sun, 21 Apr 2019 10:19:15 +0800</pubDate>
+      
+      <guid>/post/docker_container_image/</guid>
+      <description>容器与镜像概念 Docker镜像是由一系列的层(Layer)组成的，每一个层对应的都是Dockerfile文件中的一个指令，Dockerfile中指令的行数越多， 镜像的层就会越多，镜像的每一层都是只读的，除了可写的容器层(容器运行时添加的一层)，例如下面的这个Dockerfile。 FROM ubuntu:15.04 COPY . /app</description>
+    </item>
+    
+    <item>
+      <title>Docker容器数据文件管理</title>
+      <link>/post/docker_data/</link>
+      <pubDate>Fri, 19 Apr 2019 16:53:36 +0800</pubDate>
+      
+      <guid>/post/docker_data/</guid>
+      <description>在Docker容器内部创建的文件默认存储在可写的容器层，容易产生几个问题: 当容器不存在时，数据文件不能持久化，同时这些数据文件不方便在容器之外被其他进程使用。 当容器运行的时候容器可写层严重依赖宿主机，不能轻易移动这些数据文件到其他地方。 在容器层写数据文件需要存储驱动(storage driv</description>
+    </item>
+    
+    <item>
+      <title>Dockerfile详解以及高级技巧</title>
+      <link>/post/dockerfile/</link>
+      <pubDate>Sun, 07 Apr 2019 20:35:36 +0800</pubDate>
+      
+      <guid>/post/dockerfile/</guid>
+      <description>Docker是通过读取Dockerfile文件来自动构建镜像，Dockerfile其实就是一个包含了很多命令行指令的文本文件，通过这些指令来装配一个镜像。 要掌握Docker构建镜像的技巧，就必须首先了解Dockerfile的基本指令，下面先详细介绍Dockerfile中的一些常用指令。 基本</description>
+    </item>
+    
+    <item>
+      <title>PostgreSQL命令行操作</title>
+      <link>/post/postgresql/</link>
+      <pubDate>Tue, 02 Apr 2019 19:18:40 +0800</pubDate>
+      
+      <guid>/post/postgresql/</guid>
+      <description>PostgreSQL是一个功能强大的开源对象关系数据库管理系统(ORDBMS)，PostgreSQL(也称为Post-gress-Q-L)由PostgreSQL全球开发集团(全球志愿者团队)开发， 其源代码是免费提供的。但是在中国互联网的后端数据库中，PostgreSQL目前使用的比较少，大</description>
+    </item>
+    
+    <item>
+      <title>Docker Login执行流程与原理</title>
+      <link>/post/docker_login_process/</link>
+      <pubDate>Sat, 16 Mar 2019 08:54:16 +0800</pubDate>
+      
+      <guid>/post/docker_login_process/</guid>
+      <description>docker安装的时候已经同时安装了docker client，通过命令docker version即可查看客户端以及服务端的版本信息，通过执行命令docker version查看docker版本信息。docker最近暴露的runc漏洞CVE-2019-5736，企业环境请安装18.09.2以上</description>
+    </item>
+    
+    <item>
+      <title>基于Docker快速搭建wordpress博客</title>
+      <link>/post/docker_deploy_wordpress/</link>
+      <pubDate>Wed, 13 Mar 2019 10:28:01 +0800</pubDate>
+      
+      <guid>/post/docker_deploy_wordpress/</guid>
+      <description>wordpress数据存储依赖mysql数据库，以docker容器方式部署完整的wordpress博客服务，则需要从镜像仓库拉取mysql、wordpress镜像，这里选择从开源的docker hub 获取mysql 5.7版本，wordpress latest版本，同时需要准备一台具备外网环境的机器</description>
+    </item>
+    
+    <item>
+      <title>部署企业级Harbor镜像仓库服务</title>
+      <link>/post/deploy_harbor_service/</link>
+      <pubDate>Mon, 11 Mar 2019 15:14:25 +0800</pubDate>
+      
+      <guid>/post/deploy_harbor_service/</guid>
+      <description>harbor初期版本1.4是在vmware旗下，当前已经成立了新项目goharbor。并且1.6.0版本之后进行了重构，数据库由mysql转换到postgresql，部分表结构也稍微改变了，代码也增强了很多，同时新增了helm chartmuseum仓库功能。对于harbor这个项目，可能有</description>
+    </item>
+    
+  </channel>
+</rss>

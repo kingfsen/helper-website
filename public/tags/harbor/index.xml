@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>harbor on </title>
+    <link>/tags/harbor/</link>
+    <description>Recent content in harbor on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 21 May 2019 10:49:15 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/harbor/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Harbor镜像构建流程优化</title>
+      <link>/post/harbor_optimize/</link>
+      <pubDate>Tue, 21 May 2019 10:49:15 +0800</pubDate>
+      
+      <guid>/post/harbor_optimize/</guid>
+      <description>以Harbor v1.4~v1.6之间的版本为例，详细分析其构建离线包的整个流程，然后结合当前的环境以及目标，去优化这个构建流程。 在Harbor的整个构建流程中，涉及的技术知识点包括Shell、Python、Make(Makefile)、Go、Docker等，不要求对这些技术熟练精通， 能看懂</description>
+    </item>
+    
+    <item>
+      <title>开源Harbor功能结构</title>
+      <link>/post/harbor_base/</link>
+      <pubDate>Mon, 20 May 2019 14:18:25 +0800</pubDate>
+      
+      <guid>/post/harbor_base/</guid>
+      <description>在了解Harbor之前，有必要先了解一下Docker开源的Docker Registry，Registry就是用来存储管理Docker镜像的服务， 客户端可以向Registry发起镜像的上传、下拉等请求操作。Docker Registry服务早期是由Docker官方下的docker/regist</description>
+    </item>
+    
+    <item>
+      <title>Helm Harbor</title>
+      <link>/post/helm_harbor/</link>
+      <pubDate>Tue, 19 Mar 2019 10:02:41 +0800</pubDate>
+      
+      <guid>/post/helm_harbor/</guid>
+      <description>chartmuseum chartmuseum是helm chart的仓库，它的存储层支持FileSystem以及各大云厂商的对象存储中间件， 默认支持阿里云的OSS、百度的BOS、Amazon S3、Microsoft Azure、Oracle、Openstack、Google等， 其他厂商需自行实现Storage的B</description>
+    </item>
+    
+    <item>
+      <title>Docker Login执行流程与原理</title>
+      <link>/post/docker_login_process/</link>
+      <pubDate>Sat, 16 Mar 2019 08:54:16 +0800</pubDate>
+      
+      <guid>/post/docker_login_process/</guid>
+      <description>docker安装的时候已经同时安装了docker client，通过命令docker version即可查看客户端以及服务端的版本信息，通过执行命令docker version查看docker版本信息。docker最近暴露的runc漏洞CVE-2019-5736，企业环境请安装18.09.2以上</description>
+    </item>
+    
+    <item>
+      <title>Harbor仓库镜像扫描原理</title>
+      <link>/post/harbor_image_scan/</link>
+      <pubDate>Mon, 11 Mar 2019 15:59:41 +0000</pubDate>
+      
+      <guid>/post/harbor_image_scan/</guid>
+      <description>初次听说镜像扫描的人肯定有很多疑惑，总会想原理是什么呢？我们可以先思考下，windows控制面板、包括一些第三方软件比如三六零等，它们都能获取系统安装的软件以及版本，当然绿色解压版他们就无法识别，获取软件版本之后，他们就能提供一些升级的版本、以及当前软件版本的漏洞列举出来，由此可见，系统安</description>
+    </item>
+    
+    <item>
+      <title>部署企业级Harbor镜像仓库服务</title>
+      <link>/post/deploy_harbor_service/</link>
+      <pubDate>Mon, 11 Mar 2019 15:14:25 +0800</pubDate>
+      
+      <guid>/post/deploy_harbor_service/</guid>
+      <description>harbor初期版本1.4是在vmware旗下，当前已经成立了新项目goharbor。并且1.6.0版本之后进行了重构，数据库由mysql转换到postgresql，部分表结构也稍微改变了，代码也增强了很多，同时新增了helm chartmuseum仓库功能。对于harbor这个项目，可能有</description>
+    </item>
+    
+  </channel>
+</rss>

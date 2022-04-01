@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Dockerfile详解以及高级技巧 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="详细介绍Dockerfile的基本指令以及构建Docker镜像的高级技巧知识">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Dockerfile详解以及高级技巧</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-04-07T20:35:36">2019-04-07</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/docker" rel="category">docker</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">14 分钟</time>
+</div></div>
+		</header>
+
+  
+    <div class="toc">
+        <div class="toc__title"><span id="toc_menu_tip">展开书签</span></div>
+        <div class="toc__menu">
+          <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#基本指令">基本指令</a></li>
+<li><a href="#构建技巧">构建技巧</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>  
+    </div>
+    <script type="text/javascript">
+    $(".toc__title").click( function () {
+      if($(".toc__menu").css('display') == 'none') {
+        $(".toc__menu").show(); 
+        $("#toc_menu_tip").html("收起书签");
+      } else {
+        $(".toc__menu").hide(); 
+        $("#toc_menu_tip").html("展开书签");
+      }
+    });
+    </script>
+  
+<div class="content post__content clearfix">
+			
+
+<p>Docker是通过读取Dockerfile文件来自动构建镜像，Dockerfile其实就是一个包含了很多命令行指令的文本文件，通过这些指令来装配一个镜像。
+要掌握Docker构建镜像的技巧，就必须首先了解Dockerfile的基本指令，下面先详细介绍Dockerfile中的一些常用指令。</p>
+
+<h3 id="基本指令">基本指令</h3>
+
+<ul>
+<li><p><strong>FROM</strong></p>
+
+<p><code>From</code>用来在构建镜像时指定一个基础镜像，一个有效的Dockerfile文件必须以<code>From</code>指令开始，可以通过<code>AS name</code>命令给当前这个创建的阶段一个别名，
+然后这个别名在后序的<code>From</code>指令以及<code>COPY --from=name</code>可以引用。当然，严格的来说Dockerfile并不是必须以<code>From</code>指令开始，因为<code>From</code>
+指令也支持变量，在<code>From</code>之前可以通过<code>ARG</code>定义变量，这个<code>ARG</code>必须在第一个<code>From</code>指令之前。</p>
+
+<pre><code class="language-Dockerfile">ARG  CODE_VERSION=latest
+FROM base:${CODE_VERSION}
+CMD  /code/run-app
+
+FROM extras:${CODE_VERSION}
+CMD  /code/run-extras
+</code></pre>
+
+<ul>
+<li><strong>MAINTAINER</strong></li>
+</ul>
+
+<p>这个指令用来设置创建镜像的作者信息，已经废弃，官方提倡使用更灵活的<code>LABEL</code>指令，<code>LABEL</code>指令可以设置更多的属性。</p>
+
+<pre><code class="language-Dockerfile">MAINTAINER sunjinfu@163.com
+</code></pre>
+
+<p>通过<code>LABEL</code>指令代替<code>MAINTAINER</code></p>
+
+<pre><code class="language-Dockerfile">LABEL maintainer=&quot;sunjinfu@163.com&quot;
+</code></pre>
+
+<ul>
+<li><strong>LABEL</strong>
+<br /></li>
+</ul>
+
+<p><code>LABEL</code>指令主要用来给镜像增加一些metadata，一个LABEL是一个key-value形式的键值对，如果LABEL中需要包含空格或者反斜杠，必须用双引号括起来。</p>
+
+<pre><code>  LABEL &quot;name&quot;=&quot;sunjinfu&quot;
+  LABEL email=&quot;sunjinfu@163.com&quot;
+  LABEL version=&quot;1.0&quot;
+  LABEL description=&quot;I am one \
+        good man.&quot;
+</code></pre>
+
+<p>一个镜像可能有很多<code>LABEL</code>，可以通过以下两种方式尽量定义在一行中。</p>
+
+<pre><code>  LABEL &quot;name&quot;=&quot;sunjinfu&quot; email=&quot;sunjinfu@163.com&quot;
+</code></pre>
+
+<pre><code>  LABEL &quot;name&quot;=&quot;sunjinfu&quot; \
+        email=&quot;sunjinfu@163.com&quot; \
+        age=&quot;20&quot;
+</code></pre>
+
+<p><code>LABEL</code>是可以从base镜像那继承的，如果有冲突，一般先前定义的<code>LABEL</code>都会被覆盖，镜像具有哪些<code>LABEL</code>，通过<code>docker inspect</code>命令即可查看。</p>
+
+<ul>
+<li><strong>ENV</strong></li>
+</ul>
+
+<p><code>ENV</code>指令用来设置环境变量，在构建镜像阶段，后续所有的指令都可以使用它，设置环境变量有两种方式。</p>
+
+<blockquote>
+<ul>
+<li>ENV &lt;key&gt; &lt;value&gt;</li>
+<li>ENV &lt;key&gt;=&lt;value&gt; &hellip;</li>
+</ul>
+</blockquote>
+
+<p><code>ENV &lt;key&gt; &lt;value&gt;</code>只能设置单个变量，而<code>ENV &lt;key&gt;=&lt;value&gt;</code>可以同时设置多个，可以使用<code>&quot;</code>或者<code>\</code>包含空格。</p>
+
+<pre><code>ENV name=&quot;sun jinfu&quot; email=sunjinfu@163.com\ sunjinfu@126.com\ sunjinfu@gmail.com \
+    address=beijing
+</code></pre>
+
+<p>等价于</p>
+
+<pre><code>ENV name sun jinfu
+ENV email sunjinfu@163.com sunjinfu@126.com sunjinfu@gmail.com
+ENV address beijing
+</code></pre>
+
+<ul>
+<li><strong>VOLUME</strong></li>
+</ul>
+
+<p><code>VOLUME</code>指令用来创建一个给定名字的挂载点，如 <code>VOLUME [&quot;/data&quot;]</code> ，当容器运行的时候，可以很方便的将容器目录中的数据与主机目录数据共享。<code>VOLUME</code>
+是以JSON数组形式解析的，因此必须以<code>&quot;</code>括起来，如 <code>VOLUME [&quot;/data&quot;, &quot;/var/log&quot;]</code></p>
+
+<ul>
+<li><strong>WORKDIR</strong></li>
+</ul>
+
+<p><code>WORKDIR</code>用于设置工作目录，如果<code>WORKDIR</code>指令设置的目录不存在则会自动创建，在一个Dockerfile文件中可以通过<code>WORKDIR</code>设置多次工作目录，如：</p>
+
+<pre><code class="language-Dockerfile">WORKDIR /a
+WORKDIR b
+WORKDIR c
+RUN pwd
+</code></pre>
+
+<p><code>pwd</code>命令的输出结果是/a/b/c，<code>WORKDIR</code>指令可以查找在它之前通过<code>ENV</code>指令设置的环境变量。</p>
+
+<pre><code class="language-Dockerfile">ENV DIRPATH /path
+WORKDIR $DIRPATH/$DIRNAME
+RUN pwd
+</code></pre>
+
+<p><code>pwd</code>命令的输出结果是/path/$DIRNAME</p>
+
+<ul>
+<li><strong>EXPOSE</strong></li>
+</ul>
+
+<p><code>EXPOSE</code>指令用于通知Docker当前容器在运行时的监听端口，协议支持<code>TCP</code>、<code>UDP</code>，默认<code>TCP</code>，用法:</p>
+
+<pre><code class="language-Dockerfile">EXPOSE 80/tcp
+EXPOSE 80/udp
+EXPOSE 3306
+</code></pre>
+
+<p><code>EXPOSE</code>指令暴露容器端口后，执行<code>docker run</code>命令时带上flag大写 <code>-P</code>即可将容器暴露端口映射到主机的随机端口(49000~49900)，可以通过flag小写<code>-p</code>指定
+端口映射，此时实际<code>EXPOSE</code>指令并未发生任何作用，被覆盖。</p></li>
+
+<li><p><strong>HEALTHCHECK</strong></p>
+
+<p><code>HEALTHCHECK</code>指令有两种方式:</p>
+
+<blockquote>
+<ul>
+<li>HEALTHCHECK [OPTIONS] CMD command  #通过在容器内部运行一个命令健康检查</li>
+<li>HEALTHCHECK NONE #禁用从基础镜像那继承任何健康检查</li>
+</ul>
+</blockquote>
+
+<p><code>HEALTHCHECK</code>指令告诉Docker如何检查容器是否正常，当给一个容器定义了一个健康检查规则时，那么容器则有一个健康状态。当健康检查通过时，容器则会展示<code>healthy</code>，
+否则展示为<code>unhealthy</code>，<code>HEALTHCHECK</code>的OPTIONS参数如下:</p>
+
+<blockquote>
+<ul>
+<li>&ndash;interval=DURATION (default: 30s)</li>
+<li>&ndash;timeout=DURATION (default: 30s)</li>
+<li>&ndash;start-period=DURATION (default: 0s)</li>
+<li>&ndash;retries=N (default: 3)</li>
+</ul>
+</blockquote>
+
+<ul>
+<li>健康检查会在容器启动之后的<code>interval</code>秒首次执行，之后间隔<code>interval</code>秒进行健康检查，注意这里的容器启动，并不是容器内部的应用启动，比如在容器中部署了一个tomcat
+应用，这个tomcat应用需要50秒才能完成启动，而容器启动只需2秒，如果<code>interval</code>设置为30秒，健康检查又设置为调用容器内部应用的一个接口，
+每次健康检查都返回非200状态码，这样Docker就不断的重启该容器，陷入无限循环了，正确的做法是将<code>interval</code>设置大一点，比如60秒。</li>
+<li><code>timeout</code>健康检查超时时间</li>
+<li><code>start-period</code> 容器启动初始化时间，在这段时间内如果健康检查失败，并不是累加到<code>retries</code>字段上。
+<br /></li>
+</ul>
+
+<p>健康检查的<code>CMD</code>指令返回状态码，<code>0</code>表示容器健康状态，<code>1</code>表示容器不健康状态，<code>2</code>保留状态码，暂未使用。下面这个例子，http请求的响应状态码是401才表示系统健康状态。</p>
+
+<pre><code class="language-Dockerfile">HEALTHCHECK CMD curl -s -o /dev/null -w &quot;%{http_code}&quot; http://127.0.0.1:8080/api/jobs/replication/1/log|grep 401
+</code></pre>
+
+<ul>
+<li><strong>ADD</strong></li>
+</ul>
+
+<p><code>ADD</code>指令有两种方式，第二种方式可以支持包含空格的路径，因为其用<code>&quot;</code>括起来。</p>
+
+<blockquote>
+<ul>
+<li>ADD [&ndash;chown=&lt;user&gt;:&lt;group&gt;] &lt;src&gt;&hellip; &lt;dest&gt;</li>
+<li>ADD [&ndash;chown=&lt;user&gt;:&lt;group&gt;] [&rdquo;&lt;src&gt;&rdquo;,&hellip; &ldquo;&lt;dest&gt;&rdquo;]</li>
+</ul>
+</blockquote>
+
+<p><code>ADD</code>指令用于将主机中文件、目录或者通过链接指定的远程文件复制到镜像中的文件系统中，要复制的源文件、源目录都是相对于当前构建镜像的上下文。
+<code>src</code>可以包括一些匹配表达式，如：</p>
+
+<pre><code class="language-Dockerfile">ADD hom* /mydir/        # 将上下文目录中所有文件名以`hom`开始的文件复制到镜像的/mydir/目录中
+ADD hom?.txt /mydir/    # ? 匹配单个字符
+</code></pre>
+
+<p><code>dest</code>可以是一个绝对路径，也可以是一个基于<code>WORKDIR</code>的相对路径。</p>
+
+<pre><code class="language-Dockerfile">ADD test relativeDir/          # adds &quot;test&quot; to `WORKDIR`/relativeDir/
+ADD test /absoluteDir/         # adds &quot;test&quot; to /absoluteDir/
+</code></pre>
+
+<p>所有复制到镜像中的文件或者目录，默认都是以UID、GID为0的用户创建，除非通过<code>--chown</code>指定，注意，如果容器文件系统中没有<code>/etc/passwd</code>或者<code>/etc/group</code>，
+或者通过<code>--chown</code>指定的用户信息不存在，那么<code>ADD</code>操作则会失败。</p>
+
+<pre><code class="language-Dockerfile">ADD --chown=55:mygroup files* /somedir/
+ADD --chown=bin files* /somedir/
+</code></pre>
+
+<p><code>ADD</code>指令的源文件都是基于构建上下文，所以不允许<code>ADD ../somefile /somefile</code>，只能向下不能向上，添加多个文件可以写在一行。</p>
+
+<pre><code class="language-Dockerfile">ADD start.sh harbor_jobservice /harbor/   
+</code></pre>
+
+<p>也可以用<code>\</code>写在多行</p>
+
+<pre><code class="language-Dockerfile">ADD docker-compose.clair.yml \
+docker-compose.yml \
+harbor.cfg \
+install.sh \
+registry.sql \
+prepare \
+/data/harbor/
+</code></pre>
+
+<p>添加整个目录到镜像层中</p>
+
+<pre><code class="language-Dockerfile">ADD /data/harbor   /harbor
+</code></pre>
+
+<p><code>ADD</code>指令会自动将<code>gzip</code>、<code>tar.gz</code>等压缩包自动解压，当然文件是否被解压不是根据文件名决定的，而是文件内容，即使有一个空的文件以<code>.tar.gz</code>结尾，
+它也不会被解压，只是简单的将该文件添加。</p>
+
+<p>注意:</p>
+
+<blockquote>
+<ul>
+<li>src有多个，那么dest必须是个目录，dest必须以<code>/</code>结尾</li>
+<li>dest没有以<code>/</code>结尾，它会被认为是个常规的文件，直接将src文件的内容写到dest这个文件中</li>
+<li>dest目录中任何一级目录不存在，都会被自动创建</li>
+</ul>
+</blockquote>
+
+<ul>
+<li><strong>COPY</strong></li>
+</ul>
+
+<p><code>COPY</code>指令与<code>ADD</code>指令功能相似，也支持两种方式。</p>
+
+<blockquote>
+<ul>
+<li>COPY [&ndash;chown=&lt;user&gt;:&lt;group&gt;] &lt;src&gt;&hellip; &lt;dest&gt;</li>
+<li>COPY [&ndash;chown=&lt;user&gt;:&lt;group&gt;] [&rdquo;&lt;src&gt;&rdquo;,&hellip; &ldquo;&lt;dest&gt;&rdquo;]</li>
+</ul>
+</blockquote>
+
+<p><code>COPY</code>指令与<code>ADD</code>指令的区别就是它不支持远程URL文件复制，同时压缩包不会自动解压，其他用法基本与<code>ADD</code>指令一致。</p>
+
+<ul>
+<li><strong>USER</strong></li>
+</ul>
+
+<p><code>USER</code>指令用于设置容器运行时的用户名、用户组，在Dockerfile中指定用户后，后续的<code>RUN</code>、<code>CMD</code>等指令，都将以该用户身份运行。</p>
+
+<pre><code class="language-bash">    USER user
+　　USER user:group
+　　USER uid
+　　USER uid:gid
+</code></pre></li>
+
+<li><p><strong>RUN</strong></p>
+
+<p><code>RUN</code>指令有两种方式:</p>
+
+<blockquote>
+<ul>
+<li>RUN &lt;command&gt;，命令用shell方式运行，在Linux中默认的shell命令<code>/bin/sh -c</code>，windows则是<code>cmd /S /C</code></li>
+<li>RUN [&ldquo;executable&rdquo;, &ldquo;param1&rdquo;, &ldquo;param2&rdquo;] (exec方式)</li>
+</ul>
+</blockquote>
+
+<p><code>RUN</code>指令主要用来在当前镜像的最上层执行一些命令继而生成新的一个镜像层，用shell方式执行命令时可以通过一个<code>\</code>继续在文档的下一行编写一个命令。</p>
+
+<pre><code class="language-bash">RUN /bin/bash -c 'source $HOME/.bashrc; \
+echo $HOME'
+</code></pre>
+
+<p>写在一行也完全可以</p>
+
+<pre><code class="language-bash">RUN /bin/bash -c 'source $HOME/.bashrc; echo $HOME'
+</code></pre>
+
+<p>如果不想用/bin/sh，想用/bin/bash执行命令，那么就不得不使用exec方式了。</p>
+
+<pre><code>RUN [&quot;/bin/bash&quot;, &quot;-c&quot;, &quot;echo hello&quot;]
+</code></pre>
+
+<p>exec方式被解析成JSON数组，因此每一项都必须使用<code>&quot;</code>括起来，exec方式不会调用shell命令，因此<code>RUN [ &quot;echo&quot;, &quot;$HOME&quot; ]</code>中的变量$HOME不会被替换，
+要么使用shell方式运行或者<code>RUN [ &quot;sh&quot;, &quot;-c&quot;, &quot;echo $HOME&quot; ]</code> exec方式即可。</p></li>
+
+<li><p><strong>CMD</strong></p>
+
+<p><code>CMD</code>指令有三种方式:</p>
+
+<blockquote>
+<ul>
+<li>CMD [&ldquo;executable&rdquo;,&ldquo;param1&rdquo;,&ldquo;param2&rdquo;] (exec方式，推荐)</li>
+<li>CMD [&ldquo;param1&rdquo;,&ldquo;param2&rdquo;] (将param1、param2作为默认参数传递给ENTRYPOINT)</li>
+<li>CMD command param1 param2 (shell方式)</li>
+</ul>
+</blockquote>
+
+<p>Dockerfile文件中只有一个<code>CMD</code>指令会生效，如果你提供多个<code>CMD</code>，只有最后一个生效。<code>CMD</code>是容器启动时执行的一种默认行为，
+通过<code>docker run</code>运行容器时设置的命令会直接覆盖<code>CMD</code>，完全可以不设置<code>CMD</code>，设置<code>ENTRRYPOINT</code>即可。</p></li>
+
+<li><p><strong>ENTRYPOINT</strong></p>
+
+<p><code>ENTRYPOINT</code>也有两种方式:</p>
+
+<blockquote>
+<ul>
+<li><p>ENTRYPOINT [&ldquo;executable&rdquo;, &ldquo;param1&rdquo;, &ldquo;param2&rdquo;] (exec，推荐)</p></li>
+
+<li><p>ENTRYPOINT command param1 param2 (shell)</p></li>
+</ul>
+</blockquote>
+
+<p>可以通过<code>ENTRYPOINT</code>将容器配置成可执行程序，通过<code>docker run</code>运行容器时的参数均可以传递给以exec方式执行的<code>ENTRYPOINT</code>指令上，它的默认参数
+可以通过<code>CMD</code>指令进行设定，<code>docker run</code>命令设置的参数可以直接覆盖<code>CMD</code>指令为<code>ENTRRYPOINT</code>设置的默认参数，执行<code>docker run &lt;image&gt; -d</code>命令时，
+参数 <code>-d</code>会直接传递给<code>ENTRRYPOINT</code>，当然通过 <code>docker run --entrypoint</code>可以覆盖Dockerfile中的<code>ENTRYPOINT</code>。</p>
+
+<p>shell执行方式会阻止<code>CMD</code>以及<code>docker run</code>等命令的任何参数，使用这种执行方式时，<code>ENTRYPOINT</code>相当于是<code>/bin/sh -c</code>的一个子命令，该子命令不能接受信号。
+这就意味着<code>ENTRYPOINT</code>指令设定的可执行程序在容器中的PID将不是1，将不会接受Unix的任何信号，即执行<code>docker stop &lt;container&gt;</code>命令时，可执行程序无法接受到
+<code>SIGTERM</code>。</p>
+
+<p>下面举个例子，首先编写一个Dockerfile文件，然后通过该Dockerfile构建镜像test，注意<code>CMD</code>、<code>ENTRYPOINT</code>都是采用了推荐的exec方式。</p>
+
+<pre><code class="language-Dockerfile">From centos
+ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+CMD [&quot;-c&quot;]
+</code></pre>
+
+<p>构建镜像</p>
+
+<pre><code class="language-docker">#docker build -t test -f Dockerfile .
+Sending build context to Docker daemon  2.048kB
+Step 1/3 : From centos
+ ---&gt; 9f38484d220f
+Step 2/3 : ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+ ---&gt; Running in f634088947be
+Removing intermediate container f634088947be
+ ---&gt; 02dd3aeda4d3
+Step 3/3 : CMD [&quot;-c&quot;]
+ ---&gt; Running in c90a93cf729d
+Removing intermediate container c90a93cf729d
+ ---&gt; 7fae0be844ef
+Successfully built 7fae0be844ef
+Successfully tagged test:latest
+</code></pre>
+
+<p>运行容器</p>
+
+<pre><code class="language-bash"># docker run --rm --name test test:latest
+top - 02:46:03 up 55 days, 17:53,  0 users,  load average: 0.71, 0.24, 0.16
+Tasks:   1 total,   1 running,   0 sleeping,   0 stopped,   0 zombie
+%Cpu(s):  3.3 us,  6.7 sy,  0.0 ni, 90.0 id,  0.0 wa,  0.0 hi,  0.0 si,  0.0 st
+KiB Mem :  3882020 total,   561132 free,   560420 used,  2760468 buff/cache
+KiB Swap:        0 total,        0 free,        0 used.  2816488 avail Mem 
+
+PID USER      PR  NI    VIRT    RES    SHR S  %CPU %MEM     TIME+ COMMAND
+1 root      20   0   56060   1880   1444 R   0.0  0.0   0:00.03 top -b -c
+</code></pre>
+
+<p>容器中PID为1的进程为top命令，<code>CMD</code>指令将参数<code>-c</code>传递给了<code>ENTRYPOINT</code>。</p>
+
+<h3 id="构建技巧">构建技巧</h3>
+
+<ul>
+<li><strong>上下文</strong></li>
+</ul>
+
+<p>在了解构建镜像上下文的概念之前，首先要了解清楚Docker的软件架构，最基础的就是Docker Client与Docker Daemon。
+Docker Daemon是Docker架构中的主体部分，具备服务端的功能，能直接接收Docker Client发起的请求。Docker Client发起的
+相关命令<code>docker pull</code>、<code>docker build</code>等都是请求Docker Daemon服务端。</p>
+
+<p><img src="/blog/dockerfile/001.png" alt="docker" /></p>
+
+<p>从上图中，你应该已经了解了，执行<code>docker build</code>命令构建镜像实际是在服务端进行的，只不过这个服务端运行在本地主机上，通过
+<code>docker version</code>命令可以查看版本。</p>
+
+<p>Docker构建镜像时有一个上下文的概念，执行<code>docker build</code>命令时首先会把上下文目录中的所有文件全部打包发送到Docker Daemon服务端，
+所以上下文目录的大小很大程度决定了你本次镜像构建的速度，这就是为什么不要直接把Linux的根目录作为构建上下文的原因，
+构建镜像最好的习惯是新建一个目录作为构建的上下文，把Dockerfile中需要的文件都复制到该目录，然后执行命令构建镜像。</p>
+
+<p>下面举个例子，编写Dockerfile，这个Dockerfile只与主机中的一个readme.txt文件有关。</p>
+
+<pre><code class="language-Dockerfile">From centos
+ADD readme.txt /data
+ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+CMD [&quot;-c&quot;]
+</code></pre>
+
+<p>当前Dockerfile文件、readme.txt均在/root目录下，该目录下还有其他一些与镜像无关的文件。</p>
+
+<pre><code class="language-bash">[root@vm ~]# ls -lrt
+total 372568
+-rw-r--r-- 1 root root 127163815 Aug 25  2018 go1.11.linux-amd64.tar.gz
+-rw-r--r-- 1 root root      2672 Feb 13 17:04 extranet.sh
+-rw-r--r-- 1 root root 127163815 Apr 10 13:17 a.gz
+-rw-r--r-- 1 root root 127163815 Apr 10 13:18 b.gz
+drwxr-xr-x 2 root root      4096 Apr 10 13:19 tmp
+-rw-r--r-- 1 root root         8 Apr 10 13:20 readme.txt
+-rw-r--r-- 1 root root        69 Apr 10 13:21 Dockerfile
+</code></pre>
+
+<p>构建镜像</p>
+
+<pre><code class="language-docker">[root@vm ~]# docker build -t readme:v1 -f Dockerfile .
+Sending build context to Docker daemon  763.8MB
+Step 1/4 : From centos
+ ---&gt; 9f38484d220f
+Step 2/4 : ADD readme.txt /data
+ ---&gt; 90f4d2c008f2
+Step 3/4 : ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+ ---&gt; Running in 6a07e260807c
+Removing intermediate container 6a07e260807c
+ ---&gt; 927d6cebf38d
+Step 4/4 : CMD [&quot;-c&quot;]
+ ---&gt; Running in 594773b76eab
+Removing intermediate container 594773b76eab
+ ---&gt; 6917f27020e0
+Successfully built 6917f27020e0
+Successfully tagged readme:v1
+You have new mail in /var/spool/mail/root
+</code></pre>
+
+<p>从上面Docker输出信息<code>Sending build context to Docker daemon  763.8MB</code>，一共发送了763.8M文件到Docker Deamon，而Dockerfile只需要一个readme.txt文件，这就是
+构建上下文没有正确选择，在/root目录下新建一个文件夹docker作为上下文，把readme.txt都移到docker文件夹中，进行构建。</p>
+
+<pre><code class="language-docker">[root@vm172-20-0-15 ~]# docker build -t readme:v2 -f Dockerfile docker
+Sending build context to Docker daemon  2.607kB
+Step 1/4 : From centos
+---&gt; 9f38484d220f
+Step 2/4 : ADD readme.txt /data
+---&gt; Using cache
+---&gt; 90f4d2c008f2
+Step 3/4 : ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+---&gt; Using cache
+---&gt; 927d6cebf38d
+Step 4/4 : CMD [&quot;-c&quot;]
+---&gt; Using cache
+---&gt; 6917f27020e0
+Successfully built 6917f27020e0
+Successfully tagged readme:v2
+</code></pre>
+
+<p>从上面这个输出信息看，Docker Client只向Docker Daemon服务端发送了<code>2.607kB</code>大小文件。通常在大型项目中，自动化构建镜像时，一定要注意上下文的作用与范围。</p>
+
+<ul>
+<li><strong>镜像大小</strong></li>
+</ul>
+
+<p>镜像太大，同时网络带宽又有限，那么通过<code>docker pull</code>命令从镜像仓库拉取镜像时非常耗时，所以优化镜像大小很有必要，可以从以下几方面优化。</p>
+
+<blockquote>
+<ul>
+<li>选择合适的基础镜像</li>
+<li>优化Dockerfile中的指令编写，同一个指令尽量写在一行</li>
+<li>根据应用的开发语言，剥离相关的环境依赖，比如go运行时并不需要的编译环境</li>
+</ul>
+</blockquote>
+
+<p>下面以go项目container为例，选择用golang:alpine为基础镜像，这个基础镜像相比于golang:1.11.1又小很多，接着将container项目的整个源码目录复制到镜像层的GOPATH
+目录下的src目录，然后执行go install编译源码，链接成可执行文件container，Dockerfile文件如下:</p>
+
+<pre><code class="language-Dockerfile">FROM golang:alpine
+COPY src /go/src
+RUN go install -v container
+ENTRYPOINT [&quot;/go/bin/container&quot;]
+</code></pre>
+
+<p>构建镜像</p>
+
+<pre><code class="language-docker">[root@vm docker]# docker build -t container:v1.0 .
+Sending build context to Docker daemon  57.74MB
+Step 1/4 : FROM golang:alpine
+ ---&gt; 20ff4d6283c0
+Step 2/4 : COPY src /go/src
+ ---&gt; dd2d3480ebd0
+Step 3/4 : RUN go install -v container
+ ---&gt; Running in d67a1cf74365
+ ---&gt; b6c5ed0d75f5
+Removing intermediate container d67a1cf74365
+Step 4/4 : ENTRYPOINT /go/bin/container
+ ---&gt; Running in 734b0fdc6e5c
+ ---&gt; 395503e87bc1
+Removing intermediate container 734b0fdc6e5c
+Successfully built 395503e87bc1
+Successfully tagged container:v1.0
+</code></pre>
+
+<p>查看镜像大小</p>
+
+<pre><code class="language-bash">REPOSITORY    TAG                 IMAGE ID            CREATED             SIZE
+container     v1.0                395503e87bc1        2 minutes ago       386MB
+</code></pre>
+
+<p>区区一个简单的go项目竟然达到386M，并且整个项目源码也在容器中，不安全。下面将go的编译环境去除，因为go项目运行时不依赖go sdk相关组件。
+优化一下Dockerfile文件，将alpine作为最终的基础镜像。</p>
+
+<pre><code class="language-Dockerfile">FROM golang:alpine AS build-env
+MAINTAINER sunjinfu@163.com
+ADD src /go/src
+RUN go build container
+
+FROM alpine
+RUN mkdir /go
+WORKDIR /go
+COPY --from=build-env /go/container /go
+EXPOSE 8080
+ENTRYPOINT [&quot;./container&quot;]
+</code></pre>
+
+<p>构建镜像</p>
+
+<pre><code class="language-docker">[root@vm docker]# docker build -t container:v2.0 . 
+Sending build context to Docker daemon  57.74MB
+Step 1/10 : FROM golang:alpine AS build-env
+ ---&gt; 20ff4d6283c0
+Step 2/10 : MAINTAINER sunjinfu@163.com
+ ---&gt; Using cache
+ ---&gt; ac5b51c8ee48
+Step 3/10 : ADD src /go/src
+ ---&gt; a1b828a87e8d
+Step 4/10 : RUN go build container
+ ---&gt; Running in 7f4c09d3e576
+ ---&gt; cd073b46d45d
+Removing intermediate container 7f4c09d3e576
+Step 5/10 : FROM alpine
+ ---&gt; 5cb3aa00f899
+Step 6/10 : RUN mkdir /go
+ ---&gt; Running in 8a7bd2f9025d
+ ---&gt; 05b4a219e3e5
+Removing intermediate container 8a7bd2f9025d
+Step 7/10 : WORKDIR /go
+ ---&gt; fcb8526b7b76
+Removing intermediate container a8f531d742a7
+Step 8/10 : COPY --from=build-env /go/container /go
+ ---&gt; 55df14427b9c
+Step 9/10 : EXPOSE 8080
+ ---&gt; Running in 82f9e5752c90
+ ---&gt; f5c9c6e4c1ed
+Removing intermediate container 82f9e5752c90
+Step 10/10 : ENTRYPOINT ./container
+ ---&gt; Running in 9ccd355dd431
+ ---&gt; 053388fa3e2c
+Removing intermediate container 9ccd355dd431
+Successfully built 053388fa3e2c
+Successfully tagged container:v2.0
+</code></pre>
+
+<p>查看镜像大小，container:v2.0版本的镜像只有15MB。</p>
+
+<pre><code class="language-bash">REPOSITORY        TAG            IMAGE ID            CREATED              SIZE
+container         v2.0           053388fa3e2c        About a minute ago   15.6MB
+</code></pre>
+
+<ul>
+<li><strong>镜像缓存</strong></li>
+</ul>
+
+<p>Docker会缓存已有镜像的镜像层，构建新镜像时，如果某个镜像层已经存在，则直接利用缓存的镜像层，无须重新创建。</p>
+
+<pre><code class="language-Dockerfile">From centos
+ADD readme.txt /data
+ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+CMD [&quot;-c&quot;]
+</code></pre>
+
+<p>构建镜像</p>
+
+<pre><code class="language-docker">[root@vm ~]# docker build -t test:v1.0 -f Dockerfile docker
+Sending build context to Docker daemon  2.629kB
+Step 1/4 : From centos
+ ---&gt; 9f38484d220f
+Step 2/4 : ADD readme.txt /data
+ ---&gt; a097ddb31783
+Step 3/4 : ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+ ---&gt; Running in 89a4e6cd646b
+Removing intermediate container 89a4e6cd646b
+ ---&gt; d9a2db7afdf5
+Step 4/4 : CMD [&quot;-c&quot;]
+ ---&gt; Running in e51982daa4bd
+Removing intermediate container e51982daa4bd
+ ---&gt; 92dc03cdc871
+Successfully built 92dc03cdc871
+Successfully tagged test:v1.0
+</code></pre>
+
+<p>下面需要构建另外一个镜像，Dockerfile如下：</p>
+
+<pre><code class="language-Dockerfile">From centos
+ADD readme.txt /data
+EXPOSE 8080
+ADD service.yml /data
+ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+</code></pre>
+
+<p>构建镜像，在构建test:v1.0镜像时，<code>ADD readme.txt /data</code>这一镜像层的id是<code>a097ddb31783</code>，再次构建test:v2.0时将直接利用该镜像层缓存，注意查看输出信息中的
+<code>Using cache</code>，当然如果不想让Docker利用缓存，可以带上Flag参数<code>--no-cache</code>重新构建。</p>
+
+<pre><code class="language-docker">[root@vm ~]# docker build -t test:v2.0 -f Dockerfile docker
+Sending build context to Docker daemon  4.143kB
+Step 1/5 : From centos
+ ---&gt; 9f38484d220f
+Step 2/5 : ADD readme.txt /data
+ ---&gt; Using cache
+ ---&gt; a097ddb31783
+Step 3/5 : EXPOSE 8080
+ ---&gt; Running in 6c845ce26992
+Removing intermediate container 6c845ce26992
+ ---&gt; 0ab30541f7ea
+Step 4/5 : ADD service.yml /data
+ ---&gt; a0344636b78c
+Step 5/5 : ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+ ---&gt; Running in 905a22119eb7
+Removing intermediate container 905a22119eb7
+ ---&gt; f9ba0de68a00
+Successfully built f9ba0de68a00
+Successfully tagged test:v2.0
+</code></pre>
+
+<p>Dockerfile中每一个指令都是一个镜像层，上层镜像依赖下层镜像，只要某一层发生变化，其上层所有镜像层缓存均失效。</p>
+
+<ul>
+<li><strong>镜像调试</strong></li>
+</ul>
+
+<p>镜像在构建过程中也经常会失败，当出现失败时，我们可以进行调试，通过<code>docker run</code>命令可以运行失败指令的前一个指令成功构建的镜像层。</p>
+
+<pre><code class="language-Dockerfile">From centos
+ADD readme.txt /data
+EXPOSE 8080
+ADD service.yml /data/yaml/
+ENTRYPOINT [&quot;top&quot;, &quot;-b&quot;]
+</code></pre>
+
+<pre><code>[root@vm ~]# docker build -t test:v2.0 -f Dockerfile docker
+Sending build context to Docker daemon  4.194kB
+Step 1/5 : From centos
+ ---&gt; 9f38484d220f
+Step 2/5 : ADD readme.txt /data
+ ---&gt; Using cache
+ ---&gt; a097ddb31783
+Step 3/5 : EXPOSE 8080
+ ---&gt; Using cache
+ ---&gt; 0ab30541f7ea
+Step 4/5 : ADD service.yml /data/yaml/
+failed to copy files: lstat /data/docker/overlay2/026d474a8bae00c99e5b126df2ebb99128f6b2978eecb341db5cead0b89f2719/merged/data/yaml: not a directory
+</code></pre>
+
+<p>执行 <code>ADD service.yml /data/yaml</code>指令时发生错误，可以直接启动容器运行指令<code>EXPOSE 8080</code>构建的这一镜像层0ab30541f7ea。</p>
+
+<pre><code class="language-bash">[root@vm172-20-0-15 ~]# docker run -it 0ab30541f7ea sh
+sh-4.2# ls
+bin  data  dev  etc  home  lib  lib64  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+sh-4.2# cd /data
+sh: cd: /data: Not a directory
+</code></pre>
+
+<p>进入之后，我们才恍能大悟，上面已经详细介绍过<code>ADD</code>指令了，当<code>ADD</code>指令的<code>dest</code>没有以<code>/</code>结尾时，Docker会把它当成是一个文件，在这里相当于把readme.txt的文件内容写到
+了<code>/data</code>这个文件中了，此时<code>/data</code>并不是文件夹，当执行<code>ADD service.yml /data/yaml/</code>命令时，Docker会自动去创建<code>/data</code>目录，此时已经有一个<code>/data</code>同名文件存在，
+所以创建失败。</p></li>
+</ul>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/docker/" rel="tag">docker</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+	
+	<li><a href="/post/harbor_base/">开源Harbor功能结构</a></li>
+	
+	<li><a href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+	
+	<li><a href="/post/docker_image_scan/">Docker镜像扫描原理</a></li>
+	
+	<li><a href="/post/docker_storage_driver/">Docker镜像存储结构与原理</a></li>
+	
+	<li><a href="/post/docker_container_image/">Docker容器与镜像结构</a></li>
+	
+	<li><a href="/post/docker_data/">Docker容器数据文件管理</a></li>
+	
+	<li><a href="/post/postgresql/">PostgreSQL命令行操作</a></li>
+	
+	<li><a href="/post/docker_login_process/">Docker Login执行流程与原理</a></li>
+	
+	<li><a href="/post/docker_deploy_wordpress/">基于Docker快速搭建wordpress博客</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/postgresql/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">PostgreSQL命令行操作</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/docker_data/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">Docker容器数据文件管理</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

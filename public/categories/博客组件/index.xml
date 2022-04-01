@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>博客组件 on </title>
+    <link>/categories/%E5%8D%9A%E5%AE%A2%E7%BB%84%E4%BB%B6/</link>
+    <description>Recent content in 博客组件 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 31 Mar 2019 12:54:26 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/%E5%8D%9A%E5%AE%A2%E7%BB%84%E4%BB%B6/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Hugo入门详细教程</title>
+      <link>/post/hugo_base/</link>
+      <pubDate>Sun, 31 Mar 2019 12:54:26 +0800</pubDate>
+      
+      <guid>/post/hugo_base/</guid>
+      <description>首先访问Github下载Hugo的应用程序，Hugo各版本release文件下载地址 https://github.com/gohugoio/hugo/releases ， windows请选择下载hugo_0.xx.0_Windows-64bit.zip。 下载完成止之后解压文件至D:\soft\hugo_0.54，然后把该路径添加到系统环境变量Path中，执行 hugo version 命令验证</description>
+    </item>
+    
+    <item>
+      <title>网站一键分享插件Share.js</title>
+      <link>/post/share_js/</link>
+      <pubDate>Wed, 27 Mar 2019 23:02:17 +0800</pubDate>
+      
+      <guid>/post/share_js/</guid>
+      <description>一键分享功能是网站社交化的一个重要组件，当前发现一款使用非常简单的js插件，就是share.js，项目地址: https://github.com/overtrue/share.js 。 share.js使用非常简单，它可以通过参数配置自由控制展示哪些分享图标，同时它还可以自定义分享时的title以及icon。 如此简单的一个js组件，对于我这样的一个后端开发人员，</description>
+    </item>
+    
+    <item>
+      <title>开源评论系统isso</title>
+      <link>/post/isso/</link>
+      <pubDate>Wed, 27 Mar 2019 16:18:10 +0800</pubDate>
+      
+      <guid>/post/isso/</guid>
+      <description>评论功能是静态博客系统的一个特色，是阅读者交流学习的一种手段。当前国内外都开源出很多评论系统， 包括企业或者个人贡献的，但是很多评论系统临时开放出来，过一段时间则关闭停止服务，所以给自己的博客选择一款稳定 的评论系统非常重要。 对于静态博客来说，由于它缺失后台服务，所以用户的评论数据都是落地在第</description>
+    </item>
+    
+    <item>
+      <title>高效的静态网站生成器Hugo</title>
+      <link>/post/hugo_blog/</link>
+      <pubDate>Tue, 19 Mar 2019 20:05:49 +0800</pubDate>
+      
+      <guid>/post/hugo_blog/</guid>
+      <description>静态网站比较适用于博客、宣传、文档类的站点，比动态站点占用资源更小，访问速度更快。当前最流行的Wordpress博客系统功能很强大，插件也很丰富， 但是整体感觉很臃肿，占用资源也比较大，同时还需要部署一个MySQL数据库，国内有一些个人或者小团队研发了一些开源的轻量级博客，根本没什么吸引力。</description>
+    </item>
+    
+  </channel>
+</rss>

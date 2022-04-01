@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>FutureTask原理分析 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="深入分析FutureTask原码，彻底了解FutureTask的执行原理">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">FutureTask原理分析</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-03-25T16:31:58">2019-03-25</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/java" rel="category">Java</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">11 分钟</time>
+</div></div>
+		</header>
+
+  
+    <div class="toc">
+        <div class="toc__title"><span id="toc_menu_tip">展开书签</span></div>
+        <div class="toc__menu">
+          <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#callable-runnable">Callable Runnable</a></li>
+<li><a href="#futuretask父接口">FutureTask父接口</a></li>
+<li><a href="#futuretask">FutureTask</a>
+<ul>
+<li><a href="#任务状态">任务状态</a></li>
+<li><a href="#构造方法">构造方法</a></li>
+<li><a href="#run方法">run方法</a></li>
+<li><a href="#cancel方法">cancel方法</a></li>
+<li><a href="#get方法">get方法</a></li>
+</ul></li>
+<li><a href="#demo">Demo</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>  
+    </div>
+    <script type="text/javascript">
+    $(".toc__title").click( function () {
+      if($(".toc__menu").css('display') == 'none') {
+        $(".toc__menu").show(); 
+        $("#toc_menu_tip").html("收起书签");
+      } else {
+        $(".toc__menu").hide(); 
+        $("#toc_menu_tip").html("展开书签");
+      }
+    });
+    </script>
+  
+<div class="content post__content clearfix">
+			
+
+<h3 id="callable-runnable">Callable Runnable</h3>
+
+<p>在Java中可以通过继承Thread或者实现Runnable接口两种方式来创建多线程，这两种方式创建的线程执行完毕之后，我们无法获取执行结果，
+除非通过共享变量或者线程通信方式(Q消息等)间接实现，Java在1.5之后可以通过Callable和Future接口在线程执行完毕之后获取执行结果。
+在了解FutureTask之前，有必要先了解清楚Java中Callable、Runnable之间的区别，Callable是java.util.concurrent包下的接口，而Runnable
+是java.lang包下的接口。</p>
+
+<pre><code class="language-Java">public interface Runnable {
+
+    public abstract void run();
+}
+</code></pre>
+
+<hr />
+
+<pre><code class="language-Java">public interface Callable&lt;V&gt; {
+
+    V call() throws Exception;
+}
+</code></pre>
+
+<p>面试中经常会被问到Callable与Runnable的区别，至少要check到以下三个关键点。</p>
+
+<ul>
+<li>Runnable中的run方法是abstract方法</li>
+<li>Callable方法有返回值，Runnable的方法无返回值</li>
+<li>Callable的call方法允许抛异常，而Runnable的run不可抛异常</li>
+</ul>
+
+<p>Runnable与Callable本身并没有任何关系，但是可以通过java.util.concurrent中Executors的callable方法将Runnable包装成Callable。</p>
+
+<pre><code class="language-Java">//包装成具有自定义返回值的Callable
+public static &lt;T&gt; Callable&lt;T&gt; callable(Runnable task, T result) {
+    if (task == null)
+        throw new NullPointerException();
+    return new RunnableAdapter&lt;T&gt;(task, result);
+}
+//包装成不需要返回值的Callable
+public static Callable&lt;Object&gt; callable(Runnable task) {
+    if (task == null)
+        throw new NullPointerException();
+    return new RunnableAdapter&lt;Object&gt;(task, null);
+}
+//通过静态内部类RunnableAdapter实现
+static final class RunnableAdapter&lt;T&gt; implements Callable&lt;T&gt; {
+    final Runnable task;
+    final T result;
+    RunnableAdapter(Runnable task, T result) {
+        this.task = task;
+        this.result = result;
+    }
+    public T call() {
+        task.run();
+        return result;
+    }
+}
+</code></pre>
+
+<h3 id="futuretask父接口">FutureTask父接口</h3>
+
+<p>FutureTask的继承关系</p>
+
+<p><img src="/blog/futuretask/001.png" alt="futuretask" /></p>
+
+<p>从上图中看出，FutureTask实现了RunnableFuture接口，RunnableFuture接口又继承了Future、Runnable接口，所以FutureTask既可以作为一个Task
+被其他的Thread或者ThreadPool执行，又可以作为Future用来获取Callable的执行结果。Future表示的是异步计算结果，该接口定义了5个核心概念方法。</p>
+
+<ul>
+<li><p><strong>boolean cancel(boolean mayInterruptIfRunning)</strong><br/>
+该方法用来试着取消任务的执行，方法返回值代表了取消操作是否成功，任务已经完成、已经被取消或者由于某些原因不能取消则操作失败，<br/>
+任务还未开始执行，则取消成功，如果任务已经开始执行，参数mayInterruptIfRunning决定了执行任务线程是否应该被中断。<br/>
+<code>注意:任务开始执行，mayInterruptIfRunning为true，中断了执行任务的线程，仅仅是设置了该线程的中断标志，至于任务是否真正的停止执行具体要看任务逻辑的实现。</code></p>
+
+<pre><code class="language-Java">    public class MyTask implements Runnable {
+
+        @Override
+        public void run() {
+            if (Thread.interrupted()) {
+                System.out.println(&quot;Thread interrupted, stop execute task&quot;);
+            } else {
+                System.out.println(&quot;do business&quot;);
+            }
+        }
+    }
+</code></pre>
+
+<ul>
+<li><strong>boolean isCancelled()</strong><br/>
+返回任务是否在执行完成之前被取消。</li>
+<li><strong>boolean isDone()</strong><br/>
+返回任务是否已经完成，包括正常执行结束、异常或者取消，只要是终结状态则返回true。</li>
+<li><strong>V get() throws InterruptedException, ExecutionException;</strong><br/>
+返回任务执行结果，如果任务正在执行，调用get方法的线程则被阻塞，阻塞过程中被中断，则抛InterruptedException，<br/>
+如果线程被取消抛运行时异常CancellationException，如果任务执行发生异常抛ExecutionException。</li>
+<li><strong>V get(long timeout, TimeUnit unit)</strong><br/>
+该方法多了一个等待时长，在给定的时间范围内任务还未执行完毕，则抛出TimeoutException。</li>
+</ul>
+
+<p>RunnableFuture接口中未增加新的方法，重新申明了父类Runnable中的run方法。</p>
+
+<pre><code class="language-Java">public interface RunnableFuture&lt;V&gt; extends Runnable, Future&lt;V&gt; {
+
+void run();
+}
+</code></pre></li>
+</ul>
+
+<h3 id="futuretask">FutureTask</h3>
+
+<p>FutureTask中的任务类型是Callable，整个过程中这个Callable都具有一个状态state，首先看看FutureTask中定义的一些变量。</p>
+
+<pre><code class="language-Java">//Callable任务的状态，可能有下面的0-6种状态值
+private volatile int state;
+private static final int NEW          = 0;
+private static final int COMPLETING   = 1;
+private static final int NORMAL       = 2;
+private static final int EXCEPTIONAL  = 3;
+private static final int CANCELLED    = 4;
+private static final int INTERRUPTING = 5;
+private static final int INTERRUPTED  = 6;
+
+//用来存放传入的任务
+private Callable&lt;V&gt; callable;
+//用来保存任务的成功执行的结果后者执行任务时发生异常的Exception对象
+private Object outcome; 
+//用来存放执行Callable任务的线程
+private volatile Thread runner;
+//调用get方法获取任务执行结果时被阻塞的线程栈
+private volatile WaitNode waiters;
+</code></pre>
+
+<p>WaitNode的next属性引用了下一个WaitNode，这样构成了一个链表结构。</p>
+
+<pre><code class="language-Java">static final class WaitNode {
+    volatile Thread thread;
+    volatile WaitNode next;
+    WaitNode() { thread = Thread.currentThread(); }
+}
+</code></pre>
+
+<p>用volatile修饰的变量保证了线程间的可见性，在FutureTask中这些变量都是通过CAS原子操作。</p>
+
+<pre><code class="language-Java">private static final sun.misc.Unsafe UNSAFE;
+private static final long stateOffset;
+private static final long runnerOffset;
+private static final long waitersOffset;
+static {
+    try {
+        UNSAFE = sun.misc.Unsafe.getUnsafe();
+        Class&lt;?&gt; k = FutureTask.class;
+        stateOffset = UNSAFE.objectFieldOffset
+            (k.getDeclaredField(&quot;state&quot;));
+        runnerOffset = UNSAFE.objectFieldOffset
+            (k.getDeclaredField(&quot;runner&quot;));
+        waitersOffset = UNSAFE.objectFieldOffset
+            (k.getDeclaredField(&quot;waiters&quot;));
+    } catch (Exception e) {
+        throw new Error(e);
+    }
+}
+</code></pre>
+
+<h4 id="任务状态">任务状态</h4>
+
+<p>FutureTask中callable的状态一共7种，初始状态NEW，中间状态COMPLETING、INTERRUPTING，最终状态NORMAL、EXCEPTIONAL、CANCELLED、INTERRUPTED，
+中间状态一般是瞬时的，很快会过渡到最终状态。</p>
+
+<p><img src="/blog/futuretask/002.png" alt="futuretask" /></p>
+
+<h4 id="构造方法">构造方法</h4>
+
+<p>FutureTask是Java中唯一实现了RunnableFuture接口的类，它提供了两个构造方法，分别支持以Callable、Runnable类型传入任务，任务类型是
+Runnable的则利用Executors.callable方法将Runnable包装Callable，上面已经展示相关包装代码。FutureTask构造完成之后，其任务callable的状态为初始状态NEW。</p>
+
+<pre><code class="language-Java">public FutureTask(Callable&lt;V&gt; callable) {
+    if (callable == null)
+        throw new NullPointerException();
+    this.callable = callable;
+    this.state = NEW;       // ensure visibility of callable
+}
+
+
+public FutureTask(Runnable runnable, V result) {
+    this.callable = Executors.callable(runnable, result);
+    this.state = NEW;       // ensure visibility of callable
+}
+</code></pre>
+
+<h4 id="run方法">run方法</h4>
+
+<p>FutureTask实现了Runnable接口，因此run方法是执行线程或者线程池调度执行核心方法，详细分析run方法源码。</p>
+
+<pre><code class="language-Java">public void run() {
+    //Thread.currentThread此时是任务执行线程，不是发起线程
+    if (state != NEW ||
+        !UNSAFE.compareAndSwapObject(this, runnerOffset,
+                                     null, Thread.currentThread()))
+        return;
+    try {
+        Callable&lt;V&gt; c = callable;
+        if (c != null &amp;&amp; state == NEW) {
+            V result;
+            boolean ran;
+            try {
+                result = c.call();
+                ran = true;
+            } catch (Throwable ex) {
+                result = null;
+                ran = false;
+                setException(ex);
+            }
+            if (ran)
+                set(result);
+        }
+    } finally {
+        // runner must be non-null until state is settled to
+        // prevent concurrent calls to run()
+        runner = null;
+        // state must be re-read after nulling runner to prevent
+        // leaked interrupts
+        int s = state;
+        if (s &gt;= INTERRUPTING)
+            handlePossibleCancellationInterrupt(s);
+    }
+}
+</code></pre>
+
+<ul>
+<li>判断任务状态不是NEW，表示任务已经执行过，直接返回</li>
+<li>CAS设置执行线程runner，设置失败表示已经有线程在执行该任务，直接返回</li>
+<li>再次判断任务状态是否是初始状态，并且callable是否为null</li>
+<li>满足条件之后直接调用callable的call方法，实际调用了Runnable的run方法</li>
+<li>任务执行成功调用set(result)设置返回结果，任务执行发生异常，调用setException(ex)设置异常对象信息</li>
+<li>finally中语句重新获取状态state，因为有可能在执行run方法的时候，发起线程调用了FutureTask的cancel(true)方法中断执行线程，<br/>
+此时state的状态有可能为EXCEPTIONAL、NORMAL、INTERRUPTING、INTERRUPTED任何一种</li>
+<li>如果state状态此时为INTERRUPTING，表示有线程正在取消(中断)任务，此时执行线程执行Thread.yield()让出cpu执行时间，尽快让发起线程将state设置为最终状态INTERRUPTED</li>
+</ul>
+
+<pre><code class="language-Java">private void handlePossibleCancellationInterrupt(int s) {
+    if (s == INTERRUPTING)
+        while (state == INTERRUPTING)
+            Thread.yield(); 
+    }
+</code></pre>
+
+<p>任务正常执行结束，将执行结果赋值给变量outcome，state从COMPLETING状态过渡到NORMAL状态。</p>
+
+<pre><code class="language-Java">protected void set(V v) {
+    if (UNSAFE.compareAndSwapInt(this, stateOffset, NEW, COMPLETING)) {
+        outcome = v;
+        UNSAFE.putOrderedInt(this, stateOffset, NORMAL); // final state
+        finishCompletion();
+    }
+}
+</code></pre>
+
+<p>任务执行过程中发生异常，将异常对象赋值给变量outcome，因为outcome是一个Object类型，state从COMPLETING过渡到EXCEPTIONAL。</p>
+
+<pre><code class="language-Java">protected void setException(Throwable t) {
+    if (UNSAFE.compareAndSwapInt(this, stateOffset, NEW, COMPLETING)) {
+        outcome = t;
+        UNSAFE.putOrderedInt(this, stateOffset, EXCEPTIONAL); // final state
+        finishCompletion();
+    }
+}
+</code></pre>
+
+<p>不管任务正常执行结束，还是发生异常，最后都要调用finishCompletion方法处理，该方法主要用来唤醒因调用get方法而阻塞的线程，同时
+将FutureTask中的一些变量比如callable赋值null，最后调用done()方法，done方法在FutureTask中空实现，子类可以进行覆盖。</p>
+
+<pre><code class="language-Java">private void finishCompletion() {
+    // 通过for循环调用CAS操作，保证操作一定可以成功
+    for (WaitNode q; (q = waiters) != null;) {
+        if (UNSAFE.compareAndSwapObject(this, waitersOffset, q, null)) {
+            for (;;) {
+                //取出节点中的线程对象
+                Thread t = q.thread;
+                if (t != null) {
+                    q.thread = null;
+                    //唤醒线程
+                    LockSupport.unpark(t);
+                }
+                //处理下一个等待节点
+                WaitNode next = q.next;
+                //next节点为空，表示所有的等待节点均已处理完毕，退出循环
+                if (next == null)
+                    break;
+                q.next = null; // unlink to help gc
+                q = next;
+            }
+            break;
+        }
+    }
+    //子类可以覆盖该方法，增加一些额外的业务逻辑
+    done();
+
+    callable = null;        
+}
+</code></pre>
+
+<p>FutureTask中同时提供了方法isDone方法，用来表示任务是否处理完成，只要state的值不是初始状态NEW，返回true。</p>
+
+<pre><code class="language-Java">public boolean isDone() {
+    return state != NEW;
+}
+</code></pre>
+
+<h4 id="cancel方法">cancel方法</h4>
+
+<p>cancel方法主要用来取消任务的执行，前面已经介绍过，并不是任务都能取消成功，同时要理解取消操作成功，也不能意味着任务就一定未执行，因为执行线程可能还未将state从NEW设置为COMPLETING，但是已经开始执行了。
+取消方法带着一个参数mayInterruptIfRunning，该参数表示是否中断正在执行的任务，也就是说任务正在被某个执行线程处理，只是还未处理完成，针对这种情况根据该参数判断是否需要中断执行线程。</p>
+
+<pre><code class="language-Java">public boolean cancel(boolean mayInterruptIfRunning) {
+    //任务状态不是初始状态NEW，则取消失败，直接返回false
+    //或者CAS设置任务状态为INTERRUPTING/CANCELLED时失败，表示状态已经被某个执行线程修改了，直接返回false
+    if (!(state == NEW &amp;&amp;
+          UNSAFE.compareAndSwapInt(this, stateOffset, NEW,
+              mayInterruptIfRunning ? INTERRUPTING : CANCELLED)))
+        return false;
+    try {
+        //如果进入if语句，此时state状态肯定已经设置为INTERRUPTING
+        if (mayInterruptIfRunning) {
+            try {
+                Thread t = runner;
+                //中断任务的执行线程
+                if (t != null)
+                    t.interrupt();
+            } finally { 
+                //将state状态从INTERRUPTING过渡到最终状态INTERRUPTED
+                UNSAFE.putOrderedInt(this, stateOffset, INTERRUPTED);
+            }
+        }
+    } finally {
+        finishCompletion();
+    }
+    return true;
+}
+</code></pre>
+
+<p>从cancel方法代码看出，如果参数mayInterruptIfRunning为false，取消操作很简单，通过cas操作将state从NEW设置为CANCELLED，即操作成功。
+如果mayInterruptIfRunning为true，通过CAS操作将state从NEW设置为INTERRUPTING，最后变成INTERRUPTED。任务中断或者取消之后，同样调用
+finishCompletion方法唤醒所有阻塞的线程。FutureTask中提供了方法isCancel判断任务是否已经被取消，它的逻辑则是只要state是CALCELLED、
+INTERRUPTING、INTERRUPTED任何一种则表示任务被取消。</p>
+
+<pre><code class="language-Java">public boolean isCancelled() {
+    return state &gt;= CANCELLED;
+}
+</code></pre>
+
+<h4 id="get方法">get方法</h4>
+
+<p>FutureTask中提供了2个get方法，其中一个get方法不带参数，另外一个get方法有时间参数，表示获取任务执行结果时的最长等待时间，
+超过给定的时间还未获取到执行结果，则抛出TimeoutException，两个get方法均支持线程中断，发成中断时抛出InterruptedException，
+如果任务被取消，两个方法都会抛出运行时异常CancellationException。</p>
+
+<pre><code class="language-Java">public V get() throws InterruptedException, ExecutionException {
+    int s = state;
+    if (s &lt;= COMPLETING)
+        s = awaitDone(false, 0L);
+    return report(s);
+}
+
+public V get(long timeout, TimeUnit unit)
+    throws InterruptedException, ExecutionException, TimeoutException {
+    if (unit == null)
+        throw new NullPointerException();
+    int s = state;
+    if (s &lt;= COMPLETING &amp;&amp;
+        (s = awaitDone(true, unit.toNanos(timeout))) &lt;= COMPLETING)
+        throw new TimeoutException();
+    return report(s);
+}
+</code></pre>
+
+<p>两个get方法底层都是调用相同的awaitDone方法实现，只是传入参数区别，awaitDone方法是实现线程阻塞的核心方法。</p>
+
+<pre><code class="language-Java">private int awaitDone(boolean timed, long nanos)
+    throws InterruptedException {
+    //如果设置超时等待，计算出线程阻塞截止时间
+    final long deadline = timed ? System.nanoTime() + nanos : 0L;
+    WaitNode q = null;
+    boolean queued = false;
+    //线程开始自旋
+    for (;;) {
+        //如果自旋过程中，线程被中断，则将该线程从等待线程列表中移除，同时抛出InterruptedException
+        if (Thread.interrupted()) {
+            removeWaiter(q);
+            throw new InterruptedException();
+        }
+        //每次获取state最新值
+        int s = state;
+        //如果state是最终状态，则退出自旋返回
+        if (s &gt; COMPLETING) {
+            if (q != null)
+                q.thread = null;
+            return s;
+        }
+        else if (s == COMPLETING) // cannot time out yet
+            //state是中间状态，当前线程让出cpu执行时间，让其他线程尽快执行将state设置成最终状态
+            Thread.yield();
+        else if (q == null)
+            q = new WaitNode();
+        else if (!queued)
+            //waiters从这看出是一个链表形成的Stack，新加入的等待节点总是头节点
+            queued = UNSAFE.compareAndSwapObject(this, waitersOffset,
+                                                 q.next = waiters, q);
+        else if (timed) {
+            nanos = deadline - System.nanoTime();
+            //等待截止时间到了，则从等待节点栈中移除该线程节点，返回
+            if (nanos &lt;= 0L) {
+                removeWaiter(q);
+                return state;
+            }
+            //将线程阻塞指定时间
+            LockSupport.parkNanos(this, nanos);
+        }
+        else
+            //无时间限制，一直阻塞当前线程，直到其他线程调用finishCompletion唤醒
+            LockSupport.park(this);
+    }
+}
+</code></pre>
+
+<h3 id="demo">Demo</h3>
+
+<pre><code class="language-Java">public class Test {
+
+    public static void main(String[] args) {
+        Callable&lt;String&gt; callable = () -&gt; {
+            System.out.println(&quot;doing&quot;);
+            try {
+                //mock do logic
+                Thread.sleep(3000);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            System.out.println(&quot;do over&quot;);
+            return &quot;ok&quot;;
+        };
+
+        FutureTask&lt;String&gt; task = new FutureTask&lt;&gt;(callable);
+
+        new Thread(task).start();
+
+        try {
+            System.out.println(System.currentTimeMillis());
+            task.cancel(true);
+            String result = task.get();
+            System.out.println(System.currentTimeMillis());
+            System.out.println(&quot;result: &quot; + result);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+</code></pre>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/java%E6%BA%90%E7%A0%81/" rel="tag">java源码</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/tree_traverse/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">递归与非递归遍历二叉树</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/isso/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">开源评论系统isso</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

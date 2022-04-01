@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>kubernetes on </title>
+    <link>/tags/kubernetes/</link>
+    <description>Recent content in kubernetes on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 19 Mar 2020 16:05:32 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>本地部署kubernetes.io官方网站</title>
+      <link>/post/kubernetes_io_deploy/</link>
+      <pubDate>Thu, 19 Mar 2020 16:05:32 +0800</pubDate>
+      
+      <guid>/post/kubernetes_io_deploy/</guid>
+      <description>在公司办公网访问kubernetes.io官方网站非常慢，为方便工作与学习，可以将其在本地进行部署，快速阅读。kubernetes.io项目git地址: https://github.com/kubernetes/website 。 许多开源技术文档均采用Markdown编写，docker、kubernetes也不例外，之后再采用网站生成器Hugo生成静态html进</description>
+    </item>
+    
+    <item>
+      <title>CURL探索Kubernetes API Server</title>
+      <link>/post/kubernetes_curl_apiserver/</link>
+      <pubDate>Wed, 22 May 2019 19:30:52 +0800</pubDate>
+      
+      <guid>/post/kubernetes_curl_apiserver/</guid>
+      <description>在Kubernetes集群中，API Server是集群管理API的入口，由运行在Master节点上的一个名为kube-apiserver的进程提供的服务。 用户进入API可以通过kubectl、客户端库或者http rest，User 或者 Service Account可以被授权进入API。当一个请求到达AP</description>
+    </item>
+    
+    <item>
+      <title>kubernetes镜像拉取失败解决方法</title>
+      <link>/post/kubernetes_image_pull/</link>
+      <pubDate>Fri, 29 Mar 2019 10:17:45 +0800</pubDate>
+      
+      <guid>/post/kubernetes_image_pull/</guid>
+      <description>Docker Hub以及利用开源harbor项目搭建的镜像仓库服务，对于Docker Client发起的docker login、docker push、docker pull等命令都会做基本的用户认证， 最简单常用的认证方式就是Basic Auth，即在发起的http请求头中添加一个Authorization，</description>
+    </item>
+    
+    <item>
+      <title>Prometheus监控Kubernetes服务(二)</title>
+      <link>/post/prometheus_monitor_k8s2/</link>
+      <pubDate>Fri, 15 Mar 2019 09:48:52 +0800</pubDate>
+      
+      <guid>/post/prometheus_monitor_k8s2/</guid>
+      <description>prometheus相关的服务已经在kubernetes中部署完成，请参阅文章 Prometheus监控Kubernetes服务(一) 。 Prometheus Label Label在prometheus服务抓取中非常重要，通过标签重写或者标签过滤抓取目标等是非常强大的功能。除了目标本身自定义的标签，prometheus还</description>
+    </item>
+    
+    <item>
+      <title>Prometheus监控Kubernetes服务(一)</title>
+      <link>/post/prometheus_monitor_k8s/</link>
+      <pubDate>Wed, 13 Mar 2019 10:29:13 +0800</pubDate>
+      
+      <guid>/post/prometheus_monitor_k8s/</guid>
+      <description>Prometheus功能结构 Prometheus是基于golang编写的一个开源监控项目，当前应用非常广泛，尤其是与当前的容器调度平台kubernetes融合，使用Prometheus之前，我们应该了解下它的使用场景，它不能用来进行大量无规则数据的收集，不能替代日志收集工具，同时由于Pro</description>
+    </item>
+    
+  </channel>
+</rss>

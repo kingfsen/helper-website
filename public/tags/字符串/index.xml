@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>字符串 on </title>
+    <link>/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/</link>
+    <description>Recent content in 字符串 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 16 Mar 2019 13:19:14 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E5%AD%97%E7%AC%A6%E4%B8%B2/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>字符串的最小包含子串</title>
+      <link>/post/get_min_contains_sub_string/</link>
+      <pubDate>Sat, 16 Mar 2019 13:19:14 +0800</pubDate>
+      
+      <guid>/post/get_min_contains_sub_string/</guid>
+      <description>问题 给定字符串str1，str2，获取字符串str1中包含str2的最小字符子串。 str1=&amp;ldquo;abcde&amp;rdquo;, str2=&amp;ldquo;bd&amp;rdquo; -&amp;gt; bcd str1=&amp;ldquo;abcde&amp;rdquo;, str2=&amp;ldquo;cg&amp;rdquo; -&amp;gt; &amp;ldquo;&amp;rdquo; 思路 假定字符编码范围0~255 创建一个size为256的整形数组charCount，用来保存字符串str2所有字符的出现次数 整形变量match用来表示当前差几个字符未匹配 将str1、str2分</description>
+    </item>
+    
+    <item>
+      <title>判断两个单词是否为变形词</title>
+      <link>/post/check_deformation_word/</link>
+      <pubDate>Sat, 16 Mar 2019 11:29:21 +0800</pubDate>
+      
+      <guid>/post/check_deformation_word/</guid>
+      <description>问题 给定两个单词word1，word2，判断两个单词是否是变形词，即两个单词中的每个字符出现的次数一致。 word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;acbc&amp;rdquo;, 返回true word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;abbc&amp;rdquo;, 返回false word1=&amp;ldquo;abc&amp;rdquo;, word=&amp;ldquo;cba&amp;rdquo;, 返回true 思路 假定字符串的编码范围0~255。 新建一个size为256的int数组 分别将单词word1、word2转换为对应的字符数组word1C</description>
+    </item>
+    
+    <item>
+      <title>寻找字符串中不重复最长子串</title>
+      <link>/post/get_max_unique_sub_string/</link>
+      <pubDate>Thu, 14 Mar 2019 15:32:46 +0800</pubDate>
+      
+      <guid>/post/get_max_unique_sub_string/</guid>
+      <description>问题 给定一个字符串，找出这个字符串中最长的不重复子串。假定字符串编码范围在256之内(排除中文等特殊字符)，同时如果有相同长度的子串，优先获取首次寻找的子串，时间复杂度O(N)。 &amp;ldquo;abcd&amp;rdquo; -&amp;gt; &amp;ldquo;abcd&amp;rdquo; &amp;ldquo;abccd&amp;rdquo; -&amp;gt; &amp;ldquo;abc&amp;rdquo; &amp;ldquo;somok39ebab3yuvwz123&amp;rdquo; -&amp;gt; &amp;ldquo;ab3yuvwz12&amp;rdquo; 思路 用一个int数组position保存每个字符在字符串中的位置 用一个int变量mark标记下</description>
+    </item>
+    
+  </channel>
+</rss>

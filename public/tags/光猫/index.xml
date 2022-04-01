@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>光猫 on </title>
+    <link>/tags/%E5%85%89%E7%8C%AB/</link>
+    <description>Recent content in 光猫 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 26 Oct 2018 08:41:19 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E5%85%89%E7%8C%AB/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>破解联通HG8347R光猫</title>
+      <link>/post/unicom_cat/</link>
+      <pubDate>Fri, 26 Oct 2018 08:41:19 +0800</pubDate>
+      
+      <guid>/post/unicom_cat/</guid>
+      <description>安装的联通宽带，自带光猫设备，型号为HG8347R，光猫后面可以清楚的看见这个设备是华为生产的，联通定制版本。 后台管理页面基本只有设备重启这个功能了，其他所有的功能都被屏蔽，无法操作，这个自带的光猫有一些限制。 不支持5G 只有LAN1口是千兆口 穿透能力、信号很弱 强制路由拨号，联通限制一个宽带</description>
+    </item>
+    
+  </channel>
+</rss>

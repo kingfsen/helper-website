@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java on </title>
+    <link>/categories/java/</link>
+    <description>Recent content in Java on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 07 Jan 2020 11:43:39 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/java/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java互斥锁ReentrantLock实现原理</title>
+      <link>/post/reentrantlock/</link>
+      <pubDate>Tue, 07 Jan 2020 11:43:39 +0800</pubDate>
+      
+      <guid>/post/reentrantlock/</guid>
+      <description>了解AQS实现原理之后，再来分析ReentrantLock代码就非常简单了，在学习互斥锁之前很有必要搞清楚可重入锁、公平锁、非公平锁几个概念。 什么是可重入锁？线程成功获取锁之后，可以多次进入临界区访问资源，ReentrantLock就是一种可重入锁，其可重入的实现依赖于AQS的父类AOS，</description>
+    </item>
+    
+    <item>
+      <title>Java同步器框架AQS与锁实现原理</title>
+      <link>/post/juc/</link>
+      <pubDate>Thu, 12 Dec 2019 11:43:39 +0800</pubDate>
+      
+      <guid>/post/juc/</guid>
+      <description>JUC是Java中并发控制的核心包，其中AQS是并发的基础核心类，类名全称AbstractQueuedSynchronizer，其父类是AbstractOwnableSynchronizer(AOS)， 用于存取获得独占锁的线程。Java中的ReentrantLock、CountDownLa</description>
+    </item>
+    
+    <item>
+      <title>FutureTask原理分析</title>
+      <link>/post/futuretask/</link>
+      <pubDate>Mon, 25 Mar 2019 16:31:58 +0800</pubDate>
+      
+      <guid>/post/futuretask/</guid>
+      <description>Callable Runnable 在Java中可以通过继承Thread或者实现Runnable接口两种方式来创建多线程，这两种方式创建的线程执行完毕之后，我们无法获取执行结果， 除非通过共享变量或者线程通信方式(Q消息等)间接实现，Java在1.5之后可以通过Callable和Future接口在线程执行完毕之后获取执行结</description>
+    </item>
+    
+  </channel>
+</rss>

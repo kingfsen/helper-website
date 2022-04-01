@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Clair on </title>
+    <link>/tags/clair/</link>
+    <description>Recent content in Clair on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 30 Apr 2019 16:32:25 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/clair/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Docker镜像扫描之CVE漏洞数据源</title>
+      <link>/post/cve/</link>
+      <pubDate>Tue, 30 Apr 2019 16:32:25 +0800</pubDate>
+      
+      <guid>/post/cve/</guid>
+      <description>CVE，全称Common Vulnerabilities and Exposures，指的是公共已知的网络漏洞缺陷，每个漏洞都会分配一个唯一的标志CVE ID(如CVE-2008-7220)， 漏洞的相关信息由CNA维护，各系统厂商暴露出的漏洞通过CVE-ID均可在CVE 社区跟踪查询。 既然要搭建自己的CVE数据库，我们需要知道的是</description>
+    </item>
+    
+    <item>
+      <title>Harbor仓库镜像扫描原理</title>
+      <link>/post/harbor_image_scan/</link>
+      <pubDate>Mon, 11 Mar 2019 15:59:41 +0000</pubDate>
+      
+      <guid>/post/harbor_image_scan/</guid>
+      <description>初次听说镜像扫描的人肯定有很多疑惑，总会想原理是什么呢？我们可以先思考下，windows控制面板、包括一些第三方软件比如三六零等，它们都能获取系统安装的软件以及版本，当然绿色解压版他们就无法识别，获取软件版本之后，他们就能提供一些升级的版本、以及当前软件版本的漏洞列举出来，由此可见，系统安</description>
+    </item>
+    
+  </channel>
+</rss>

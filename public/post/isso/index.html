@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>开源评论系统isso - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="一款超级好用的静态博客评论系统isso">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">开源评论系统isso</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-03-27T16:18:10">2019-03-27</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6" rel="category">博客组件</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">5 分钟</time>
+</div></div>
+		</header>
+
+  
+<div class="content post__content clearfix">
+			<p>评论功能是静态博客系统的一个特色，是阅读者交流学习的一种手段。当前国内外都开源出很多评论系统，
+包括企业或者个人贡献的，但是很多评论系统临时开放出来，过一段时间则关闭停止服务，所以给自己的博客选择一款稳定
+的评论系统非常重要。</p>
+
+<p>对于静态博客来说，由于它缺失后台服务，所以用户的评论数据都是落地在第三方评论系统中，通过第三方提供的JS脚本来实现阅读评论功能。</p>
+
+<ul>
+<li>优点<br/>
+博客不用搭建后台服务、数据库等就实现了一个完整的评论系统</li>
+<li>缺点<br/>
+数据在第三方，如果第三方评论系统停止服务，那么评论数据面临丢失，博客评论功能瘫痪，需要重新更换其他评论组件</li>
+</ul>
+
+<p>总结当前一些流行的评论组件现状</p>
+
+<ul>
+<li>Disqus<br/>
+Disqus是国外最流行的大厂评论系统，大多静态网站生成器Hexo、Hugo、Jekyll等都默认支持Disqus，但是国内无法访问，必须翻墙。</li>
+<li>多说<br/>
+国内最流行的评论系统，2017年已停止提供服务。</li>
+<li>畅言<br/>
+需要备案，严格审核，有限制。</li>
+<li>gitment<br/>
+gitment是由个人提供出来的评论系统，它依托github的仓库issue功能，代理了github的授权，每个页面都必须手动初始化评论，<br/>
+现在这个作者居然不维护了，它的授权代理服务都宕机了。本来感觉每个页面都需要手动初始化评论这个还能忍受，毕竟github的<br/>
+人气非常庞大，
+但是个人提供的服务挂掉很久都没人维护了。</li>
+<li>others<br/>
+<a href="https://github.com/talkatv/talkatv">talkatv</a> 、<a href="https://github.com/phusion/juvia">juvia</a> 等</li>
+</ul>
+
+<p>总结了一下，将评论数据落地在第三方系统中，还不如自己再搭建一个，数据自己管理和备份，这种评论系统也不占用多少资源，并且有很多现成的开源，
+一键部署就可以提供服务了。看了一些评论系统之后，最后我选择了<a href="https://posativ.org/isso/docs/">isso</a> 。</p>
+
+<p><img src="/blog/isso/003.png" alt="en" /></p>
+
+<p>这里我直接选择了汉化版的isso，其实无非是修改了开源isso的html样式。</p>
+
+<p><img src="/blog/isso/002.png" alt="en" /></p>
+
+<ul>
+<li>isso有非常丰富的wiki文档</li>
+<li>后台服务端部署超级简单，提供了API接口</li>
+<li>HTML嵌入JS超级简洁</li>
+<li>isso通过参数配置提供了很多控制功能，比如邮件提醒、评论修改、评论速度等</li>
+<li>支持匿名评论</li>
+<li>最重要的一点是isso自带管理后台</li>
+</ul>
+
+<p>isso是用Python语言编写的软件，后端数据库是SQLite，支持Disqus以及Wordpress的数据导入。下面介绍一下如何部署，根据<a href="https://posativ.org/isso/docs/">官网文档</a> 介绍，花几分钟就能把服务部署起来。
+这里推荐大家使用Docker容器方式启动isso服务，这样就避免了环境的配置以及依赖组件的安装。isso的镜像已经提供在docker hub上，地址 <a href="https://hub.docker.com/r/wonderfall/isso">https://hub.docker.com/r/wonderfall/isso</a> 。
+这个isso镜像ui是汉化版的，是其他开发者上传的，使用任何docker镜像之前，都应该先阅读一遍其Dockerfile文件。</p>
+
+<pre><code class="language-Dockerfile">FROM alpine:3.9
+
+ARG ISSO_VER=0.12.2
+
+ENV GID=1000 UID=1000
+
+RUN apk -U upgrade \
+ &amp;&amp; apk add -t build-dependencies \
+    python3-dev \
+    libffi-dev \
+    build-base \
+ &amp;&amp; apk add \
+    python3 \
+    sqlite \
+    openssl \
+    ca-certificates \
+    su-exec \
+    tini \
+ &amp;&amp; pip3 install --no-cache &quot;isso==${ISSO_VER}&quot; \
+ &amp;&amp; apk del build-dependencies \
+ &amp;&amp; rm -rf /tmp/* /var/cache/apk/*
+
+COPY run.sh /usr/local/bin/run.sh
+
+RUN chmod +x /usr/local/bin/run.sh
+
+EXPOSE 8080
+
+VOLUME /db /config
+
+LABEL maintainer=&quot;Wonderfall &lt;wonderfall@targaryen.house&gt;&quot;
+
+CMD [&quot;run.sh&quot;]
+</code></pre>
+
+<p>接着编写isso的启动配置文件isso.conf，大部分配置参数是可选的，这里提供了一份完整的默认配置以及注释<code>https://github.com/posativ/isso/blob/master/share/isso.conf</code> 。
+启动时必须的最少配置参数</p>
+
+<pre><code>[general]
+dbpath = /var/lib/isso/comments.db
+host = https://example.tld/
+[server]
+listen = http://localhost:1234/
+</code></pre>
+
+<p>其中host参数是比较重要的，这个host可以配置多个，类似一个白名单的作用，listen是服务器启动的监听地址。isso后端支持配置多个网站同时使用其作为评论系统，
+这里提供稍微丰富一点的真实配置。</p>
+
+<pre><code class="language-text">[general]
+
+dbpath = /db/comments.db
+host = https://www.kingfsen.cn/
+max-age = 15m
+notify = stdout
+reply-notifications = false
+gravatar = false
+gravarar-url = https://www.gravatar.com/avatar/{}?d=identicon
+
+[moderation]
+
+enabled = false
+purge-after = 30d
+
+[server]
+
+listen = http://0.0.0.0:8080
+public-endpoint = 
+reload = off
+profile = off
+
+[guard]
+
+enabled = true
+ratelimit = 10
+direct-reply = 3
+reply-to-self = false
+require-author = false
+require-email = false
+</code></pre>
+
+<p>然后将isso启动配置文件放在机器的/data/isso/config目录下。
+拉取镜像</p>
+
+<pre><code>docker pull wonderfall/isso
+</code></pre>
+
+<p>启动isso容器</p>
+
+<pre><code>docker run -d --name isso -p 8080:8080 -v /data/isso/config:/config -v /data/isso/db:/db wonderfall/isso:latest
+</code></pre>
+
+<p>发送请求验证一下</p>
+
+<pre><code>curl http://localhost:8080/count 
+</code></pre>
+
+<p>容器启动之后，isso容器服务端口映射到了宿主机的8080，同时/data/isso/db目录将备份了评论数据。由于我的博客也是部署在当前机器上的nginx中，
+接着增加一段配置，nginx代理了isso的服务接口，HTML页面通过域名跨域请求isso服务。</p>
+
+<pre><code class="language-Bash">location /isso {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header X-Script-Name /isso;
+    proxy_set_header Host $host;
+    proxy_set_header X-Forwarded-Proto $scheme;
+    proxy_pass http://localhost:8080;
+}        
+</code></pre>
+
+<p>因为我们的博客一般默认是location / ，所以这里isso的服务接口都默认以/isso开头，发送请求验证一下，我的nginx配置的域名<a href="https://www.youendless.com">https://www.youendless.com</a> 。</p>
+
+<pre><code>curl https://www.youendless.com/isso/count
+</code></pre>
+
+<p>如果需要开启管理后台需要在isso.conf中增加admin相关配置，密码请记得复杂一点，毕竟通过开发者工具即可获取isso的管理后台。</p>
+
+<pre><code>[admin]
+
+enabled = true
+password = goodnight;
+</code></pre>
+
+<p>然后浏览器直接访问<code>https://www.youendless.com/isso/admin</code>，密码输入正确之后回车即可进入，虽然UI是丑了一点，但是这么精简的东西，实用才是最好的。</p>
+
+<p><img src="/blog/isso/001.png" alt="en" /></p>
+
+<p>isso后端服务没问题，则可以开始在HTML中添加isso的js脚本了。hugo生成的website就是方便，直接新建一个模板isso.html，
+通过定义block，在要添加评论的地方直接引入接口，没有模板，则直接把下面的内容添加到需要评论的HTML中即可，有模板，直接将如下内容添加模板中，再把模板嵌入到需要的其他模板中即可。</p>
+
+<pre><code class="language-JS">&lt;script data-isso=&quot;https://www.youendless.com/isso/&quot;
+        src=&quot;https://www.youendless.com/isso/js/embed.min.js&quot;&gt;&lt;/script&gt;
+
+&lt;section id=&quot;isso-thread&quot;&gt;&lt;/section&gt;
+</code></pre>
+
+<p>注意data-isso属性，请根据在nginx中转发路径进行配置，如果isso服务与网站在同一个ngxin下，可以直接data-isso=&ldquo;/isso/&ldquo;，src属性也一样去除域名即可。
+如果配置错误，按F12打开浏览器调试面板，可以看见js文件请求失败。
+在本地测试的时候，URL是localhost，不是isso中配置的host，所以本地测试会报错。每篇文章下面的评论，就是通过isso实现的，支持匿名评论，随心所欲的交流。</p>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/%E8%AF%84%E8%AE%BA%E7%B3%BB%E7%BB%9F/" rel="tag">评论系统</a></li>
+		<li class="tags__item"><a class="tags__link btn" href="/tags/%E5%8D%9A%E5%AE%A2%E6%8F%92%E4%BB%B6/" rel="tag">博客插件</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/futuretask/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">FutureTask原理分析</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/share_js/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">网站一键分享插件Share.js</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

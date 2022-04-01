@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>hugo on </title>
+    <link>/tags/hugo/</link>
+    <description>Recent content in hugo on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 19 Mar 2020 16:05:32 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/hugo/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>本地部署kubernetes.io官方网站</title>
+      <link>/post/kubernetes_io_deploy/</link>
+      <pubDate>Thu, 19 Mar 2020 16:05:32 +0800</pubDate>
+      
+      <guid>/post/kubernetes_io_deploy/</guid>
+      <description>在公司办公网访问kubernetes.io官方网站非常慢，为方便工作与学习，可以将其在本地进行部署，快速阅读。kubernetes.io项目git地址: https://github.com/kubernetes/website 。 许多开源技术文档均采用Markdown编写，docker、kubernetes也不例外，之后再采用网站生成器Hugo生成静态html进</description>
+    </item>
+    
+    <item>
+      <title>Hugo入门详细教程</title>
+      <link>/post/hugo_base/</link>
+      <pubDate>Sun, 31 Mar 2019 12:54:26 +0800</pubDate>
+      
+      <guid>/post/hugo_base/</guid>
+      <description>首先访问Github下载Hugo的应用程序，Hugo各版本release文件下载地址 https://github.com/gohugoio/hugo/releases ， windows请选择下载hugo_0.xx.0_Windows-64bit.zip。 下载完成止之后解压文件至D:\soft\hugo_0.54，然后把该路径添加到系统环境变量Path中，执行 hugo version 命令验证</description>
+    </item>
+    
+    <item>
+      <title>高效的静态网站生成器Hugo</title>
+      <link>/post/hugo_blog/</link>
+      <pubDate>Tue, 19 Mar 2019 20:05:49 +0800</pubDate>
+      
+      <guid>/post/hugo_blog/</guid>
+      <description>静态网站比较适用于博客、宣传、文档类的站点，比动态站点占用资源更小，访问速度更快。当前最流行的Wordpress博客系统功能很强大，插件也很丰富， 但是整体感觉很臃肿，占用资源也比较大，同时还需要部署一个MySQL数据库，国内有一些个人或者小团队研发了一些开源的轻量级博客，根本没什么吸引力。</description>
+    </item>
+    
+  </channel>
+</rss>

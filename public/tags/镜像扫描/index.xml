@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>镜像扫描 on </title>
+    <link>/tags/%E9%95%9C%E5%83%8F%E6%89%AB%E6%8F%8F/</link>
+    <description>Recent content in 镜像扫描 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 05 May 2019 15:18:22 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E9%95%9C%E5%83%8F%E6%89%AB%E6%8F%8F/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Docker镜像扫描原理</title>
+      <link>/post/docker_image_scan/</link>
+      <pubDate>Sun, 05 May 2019 15:18:22 +0800</pubDate>
+      
+      <guid>/post/docker_image_scan/</guid>
+      <description>初次听说镜像扫描想必很多疑惑，因为不明白其中的处理过程与原理。以Windows为例，它的控制面板以及一些第三方安全软件(三六零等)总能展示当前系统已安装的软件包， 当然绿色解压版则无法探测，它们无非是读取了操作系统的一些系统资源文件。Linux系统也不例外，通过软件管理包rpm、dpkg等安</description>
+    </item>
+    
+    <item>
+      <title>Harbor仓库镜像扫描原理</title>
+      <link>/post/harbor_image_scan/</link>
+      <pubDate>Mon, 11 Mar 2019 15:59:41 +0000</pubDate>
+      
+      <guid>/post/harbor_image_scan/</guid>
+      <description>初次听说镜像扫描的人肯定有很多疑惑，总会想原理是什么呢？我们可以先思考下，windows控制面板、包括一些第三方软件比如三六零等，它们都能获取系统安装的软件以及版本，当然绿色解压版他们就无法识别，获取软件版本之后，他们就能提供一些升级的版本、以及当前软件版本的漏洞列举出来，由此可见，系统安</description>
+    </item>
+    
+  </channel>
+</rss>

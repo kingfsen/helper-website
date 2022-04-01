@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Categories on </title>
+    <link>/categories/</link>
+    <description>Recent content in Categories on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 07 Jan 2020 11:43:39 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java</title>
+      <link>/categories/java/</link>
+      <pubDate>Tue, 07 Jan 2020 11:43:39 +0800</pubDate>
+      
+      <guid>/categories/java/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>容器生态</title>
+      <link>/categories/%E5%AE%B9%E5%99%A8%E7%94%9F%E6%80%81/</link>
+      <pubDate>Sun, 02 Jun 2019 13:05:32 +0800</pubDate>
+      
+      <guid>/categories/%E5%AE%B9%E5%99%A8%E7%94%9F%E6%80%81/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>golang</title>
+      <link>/categories/golang/</link>
+      <pubDate>Fri, 31 May 2019 16:51:12 +0800</pubDate>
+      
+      <guid>/categories/golang/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>docker</title>
+      <link>/categories/docker/</link>
+      <pubDate>Tue, 21 May 2019 10:49:15 +0800</pubDate>
+      
+      <guid>/categories/docker/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>博客组件</title>
+      <link>/categories/%E5%8D%9A%E5%AE%A2%E7%BB%84%E4%BB%B6/</link>
+      <pubDate>Sun, 31 Mar 2019 12:54:26 +0800</pubDate>
+      
+      <guid>/categories/%E5%8D%9A%E5%AE%A2%E7%BB%84%E4%BB%B6/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>Java基础算法</title>
+      <link>/categories/java%E5%9F%BA%E7%A1%80%E7%AE%97%E6%B3%95/</link>
+      <pubDate>Sun, 24 Mar 2019 16:01:34 +0800</pubDate>
+      
+      <guid>/categories/java%E5%9F%BA%E7%A1%80%E7%AE%97%E6%B3%95/</guid>
+      <description></description>
+    </item>
+    
+    <item>
+      <title>生活技巧</title>
+      <link>/categories/%E7%94%9F%E6%B4%BB%E6%8A%80%E5%B7%A7/</link>
+      <pubDate>Fri, 26 Oct 2018 08:41:19 +0800</pubDate>
+      
+      <guid>/categories/%E7%94%9F%E6%B4%BB%E6%8A%80%E5%B7%A7/</guid>
+      <description></description>
+    </item>
+    
+  </channel>
+</rss>

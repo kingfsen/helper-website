@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>部署企业级Harbor镜像仓库服务 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="部署企业级Harbor镜像仓库服务">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">部署企业级Harbor镜像仓库服务</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-03-11T15:14:25">2019-03-11</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/docker" rel="category">docker</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">7 分钟</time>
+</div></div>
+		</header>
+
+  
+    <div class="toc">
+        <div class="toc__title"><span id="toc_menu_tip">展开书签</span></div>
+        <div class="toc__menu">
+          <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#架构部署">架构部署</a></li>
+<li><a href="#功能结构">功能结构</a></li>
+<li><a href="#编译源码">编译源码</a></li>
+<li><a href="#构建镜像">构建镜像</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>  
+    </div>
+    <script type="text/javascript">
+    $(".toc__title").click( function () {
+      if($(".toc__menu").css('display') == 'none') {
+        $(".toc__menu").show(); 
+        $("#toc_menu_tip").html("收起书签");
+      } else {
+        $(".toc__menu").hide(); 
+        $("#toc_menu_tip").html("展开书签");
+      }
+    });
+    </script>
+  
+<div class="content post__content clearfix">
+			
+
+<p>harbor初期版本1.4是在vmware旗下，当前已经成立了新项目goharbor。并且1.6.0版本之后进行了重构，数据库由mysql转换到postgresql，部分表结构也稍微改变了，代码也增强了很多，同时新增了helm chartmuseum仓库功能。对于harbor这个项目，可能有些开发者不太了解或者疑惑，为什么不直接使用docker registry，然后在registry上面再增加一个Auth鉴权。当然对于个人开发者或者企业内部，完全可以这样，不用管授权的问题。但是对于一个企业对外提供镜像存储服务，没有授权，那是不行的，A上传的镜像，B可以随便进行操作，这就不能作为企业级的产品了。harbor项目的开源之处就在于此，集很多开源组件于自身，并且组件都是插拔式，企业可以根据自身需求进行模块选择，然后再对外提供统一的服务。
+harbor依赖的软件环境是docker、docker-compose，单台机器的硬件配置至少2核4G。首先说一下，个人开发者如何快速启动harbor服务用于学习研究。访问<a href="https://github.com/goharbor/harbor/releases">https://github.com/goharbor/harbor/releases</a>, 下载对应的harbor离线安装包。</p>
+
+<pre><code class="language-Bash">tar -zxvf harbor-offline-installer-v1.7.0.tgz
+cd harbor
+./prepare --with-clair
+./install.sh --with-clair
+</code></pre>
+
+<p><code>./prepare</code> 会把harbor.cfg中的配置参数渲染到对应的各个组件参数配置目录，即common/config下面。&ndash;with-clair表示启动镜像扫描功能，&ndash;with-chartmuseum 表示启动helm charmuseum功能，如果只需基础服务，直接./prepare &amp;&amp; install.sh即可，停止harbor，请根据服务执行docker-compose -f docker-compose.yml -f docker-compose.clair.yml down 。单机服务所有的组件都是以容器方式启动的，包括存储层的redis、mysql、postgresql。</p>
+
+<p><img src="/blog/harbor_service_deploy/001.png" alt="harbor服务组件图" /></p>
+
+<p>以上只是作为个人开发者研究使用，但如果用于企业的的产品线上，我们必须进行HA部署，防止单点故障，同时进行源码二次开发改造，融入到业务的的产品线中，对外提供稳定的镜像储存服务。下面，我们就把harbor作为企业项目来讲讲。
+harbor依赖的数据存储中间件跟它的版本有很大关联，毕竟harbor项目可能也是两拨人开发，现在把它作为独立的项目，可能会开始发力把它功能做的更完善，代码写的更规范。harobr1.5之前的版本采用的数据库是mysql，redis不是必须的，即使ha部署时涉及到session同步存储，可以修改源码直接使用msyql代码，同时关闭registry的缓存功能，但是harbor依赖的镜像扫描组件是coreos的clair项目，这clair又只支持postgresql，并且clair官方并不想去支持其他数据库。对于大多中国互联网公司，用的最多的数据库莫过于msyql了，但是歪果开源项目偏偏都开始流行使用postgresql。不知道harbor官方是否考虑到这个问题，直接在1.6.0版本之后强制使用postgresql数据库，不再去支持mysql数据库了。我是在早期1.4版本构建了公司项目，迁库迁移数据，那就算了，只能修改源码，叠功能了，作为公司的个性化项目，本身也不可能轻易去同步官方代码，唯有谨慎功能迭代了。</p>
+
+<h3 id="架构部署">架构部署</h3>
+
+<p><img src="blog/harbor_service_deploy/002.jpg" alt="harbor部署架构图" /></p>
+
+<p>对于企业项目来说，重要的存储中间件，肯定都要抽离出来，当前各云厂商都具备这些云服务。对于当前采用harbor新版本部署服务的企业来说，它的开发者太幸运了，直接少了mysql组件，根本不会感知harbor的重构。早期的v1.4，就是必须依赖这些，到现在，已经稳定运行2年时间，不可能再去迁移数据库了。上面只是一个简单的参考模型，对于很多企业来说，直接全都走公网模式也行。</p>
+
+<p>mysql是harbor的数据库，ks3、s3、oss等这些对象存储层用来存储镜像文件，redis主要用来进行registry缓存、session存储包括后期的helm chartmuseum缓存，postgresql用来存储clair从各大开源社区获取的CVE漏洞缺陷数据以及镜像层的扫描结构数据，当前CVE的数据从2002到2018年差不多将近20万条。</p>
+
+<h3 id="功能结构">功能结构</h3>
+
+<p><img src="/blog/harbor_service_deploy/003.jpg" alt="harbor功能结构" /></p>
+
+<p>上图中的实线箭头代表的是请求方向。
+harbor服务主要包含Proxy、Adminserver、Jobservice、UI、Registry、Log六个组件，这六个容器必须成功启动才能构成一个完整的整体服务。</p>
+
+<blockquote>
+<ul>
+<li><p>harbor通过Proxy进行反向代理接收所有的请求，然后转发到对应的内部服务组件。所有进入Registry的请求都必须携带token，因此，需要访问Registry的服务必须先通过UI组件中的token服务获取一个有效token，再去请求Registry，典型的例子就是Docker Client的docker login、docker pull等相关请求。</p></li>
+
+<li><p>Adminserver主要是用来管理系统启动配置，操作数据库中的配置表properties。</p></li>
+
+<li><p>Jobservice主要处理两类定时任务，镜像扫描任务以及仓库镜像远程复制任务。</p></li>
+
+<li><p>UI是业务核心模块，web ui是官方web管理端(已不对用户开放)，api主要提供对外的rest http服务，token主要代理了registry的所有请求身份认证功能，基于jwt生成令牌，同时利用密钥加密。webhook主要提供给Registry、Clair的回调，当Registry镜像推送或者下拉成功时即通知UI，以及Clair漏洞数据有更新时通知UI。</p></li>
+
+<li><p>Registry是镜像处理的核心组件，处理镜像的上传、下拉等，直接操作镜像存储服务，如KS3、FileSystem等。</p></li>
+
+<li><p>Log是harbor内部的日志收集功能，harbor服务启动的时候，Log是最优先启动的模块。</p></li>
+</ul>
+</blockquote>
+
+<h3 id="编译源码">编译源码</h3>
+
+<p>基于harbor的源码二次开发，当然需要进行编译。首先需要搞明白harbor目录下的Makefile以及子目录make/photon/Makefile文件，这两个文件是编译的核心流程。官方的编译命令</p>
+
+<pre><code class="language-Bash">make package_offline GOBUILDIMAGE=golang:1.7.3 COMPILETAG=compile_golangimage CLARITYIMAGE=vmware/harbor-clarity-ui-builder:1.2.7
+</code></pre>
+
+<p>如果需要增加扩展功能，比如镜像扫描，则带上参数ClairFlag</p>
+
+<pre><code class="language-Bash">make package_offline GOBUILDIMAGE=golang:1.7.3 COMPILETAG=compile_golangimage CLARITYIMAGE=vmware/harbor-clarity-ui-builder:1.2.7 CLAIRFLAG=true
+</code></pre>
+
+<p>官方给出的编译方法全都是基于在docker容器中进行的，不依赖当前的宿主机环境，比如编译adminserver、jobservice、ui等go模块代码都是启动一个运行go:1.7.3的容器，然后把harobr的源码目录映射到启动的容器目录中，进行编译，编译之后会在对应的目录下生成对应模块的可执行文件。以harbor的ui模块为例，makefile中的编译命令如下</p>
+
+<pre><code class="language-Bash">@echo &quot;compiling binary for ui (golang image)...&quot;
+@echo $(GOBASEPATH)
+@echo $(GOBUILDPATH)
+@$(DOCKERCMD) run --rm -v $(BUILDPATH):$(GOBUILDPATH) -w $(GOBUILDPATH_UI) $(GOBUILDIMAGE) $(GOIMAGEBUILD) -v -o $(GOBUILDMAKEPATH_UI)/$(UIBINARYNAME)
+@echo &quot;Done.&quot;
+</code></pre>
+
+<p>make执行的时候这个build_ui执行的命令即为（我当前的gopath为/data/go_workspace）</p>
+
+<pre><code class="language-Bash">docker run --rm -v /data/go_workspace/src/github.com/vmware/harbor:/go/src/github.com/vmware/harbor -w /go/src/github.com/vmware/harbor/ui -v -o
+/data/go_workspace/src/github.com/vmware/harbor/make/dev/ui/harbor_ui　
+</code></pre>
+
+<p>当然官方自带的ui则是由运行镜像vmware/harbor-clarity-ui-builder:1.2.7的容器进行构建，构建成功之后则会生成几个css、js文件。</p>
+
+<pre><code class="language-Bash">docker run --rm -v /data/go_workspace/src/github.com/vmware/harbor/src:/harbor_src vmware/harbor-clarity-ui-builder:1.2.7 /bin/bash /entrypoint.sh
+</code></pre>
+
+<p>每次编译这些都会耗费很多时间，尤其是ui中的web，每次需要下载很多包。我们完全可以在宿主机上搭建go编译环境，每次快速编译，只需针对jobservice、adminserver、ui三个go模块，其他组件我们基本不会进行改动。</p>
+
+<h3 id="构建镜像">构建镜像</h3>
+
+<p>不需要每次都去下载那些依赖组件，可以在官方的基础上构建我们自己的基础镜像。官方构建ui模块的Dockerfile</p>
+
+<pre><code class="language-Dockerfile">FROM vmware/photon:1.0
+
+RUN tdnf distro-sync -y || echo \
+    &amp;&amp; tdnf erase vim -y \
+    &amp;&amp; tdnf install sudo -y \
+    &amp;&amp; tdnf clean all \
+    &amp;&amp; groupadd -r -g 10000 harbor &amp;&amp; useradd --no-log-init -r -g 10000 -u 10000 harbor \
+    &amp;&amp; mkdir /harbor/
+
+HEALTHCHECK CMD curl -s -o /dev/null -w &quot;%{http_code}&quot; 127.0.0.1:8080/api/systeminfo|grep 200
+COPY ./make/dev/ui/harbor_ui ./src/favicon.ico ./make/photon/ui/start.sh ./VERSION /harbor/
+COPY ./src/ui/views /harbor/views
+COPY ./src/ui/static /harbor/static
+
+RUN chmod u+x /harbor/start.sh /harbor/harbor_ui
+WORKDIR /harbor/
+    
+ENTRYPOINT [&quot;/harbor/start.sh&quot;]
+</code></pre>
+
+<p>因为官方的各模块的Dockerfile都是安装vim、sudo包，我们把它作为基础镜像.</p>
+
+<pre><code class="language-Dockerfile">FROM vmware/photon:1.0
+
+MAINTAINER sunjinfu@163.com
+
+RUN tdnf distro-sync -y || echo \
+    &amp;&amp; tdnf erase vim -y \
+    &amp;&amp; tdnf install sudo -y \
+    &amp;&amp; tdnf clean all \
+    &amp;&amp; groupadd -r -g 10000 harbor &amp;&amp; useradd --no-log-init -r -g 10000 -u 10000 harbor \
+    &amp;&amp; mkdir /harbor/
+</code></pre>
+
+<p>执行 docker build -t xx.com/xx/harbor-photon:1.0 .
+之后在我们的base镜像harbor-photon上进行build ui image</p>
+
+<pre><code class="language-Dockerfile">FROM xx/xx/harbor-photon:1.0
+ 
+MAINTAINER sunjinfu@163.com
+ 
+HEALTHCHECK CMD curl -s -o /dev/null -w &quot;%{http_code}&quot; 127.0.0.1:8080/api/systeminfo|grep 200
+COPY harbor_ui favicon.ico start.sh VERSION /harbor/
+COPY views /harbor/views
+COPY static /harbor/static
+ 
+RUN chmod u+x /harbor/start.sh /harbor/harbor_ui
+WORKDIR /harbor/
+ 
+ENTRYPOINT [&quot;/harbor/start.sh&quot;]
+</code></pre>
+
+<p>同时harbor依赖的其他第三方组件，比如支持镜像扫描的clair镜像，它是在执行make的时候每次都去github.com拉取源码进行编译，然后构建镜像的。这些依赖的第三方镜像我们都可以自行去github获取源码编译构建镜像，然后改写harbor的docker-compose文件，精简harbor的编译构建环节。之后，只需编写一个脚本，从git拉取源码，然后本地直接编译构建镜像，推送到远程仓库，应用部署，效率显著提高。</p>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/harbor/" rel="tag">harbor</a></li>
+		<li class="tags__item"><a class="tags__link btn" href="/tags/docker/" rel="tag">docker</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+	
+	<li><a href="/post/harbor_base/">开源Harbor功能结构</a></li>
+	
+	<li><a href="/post/docker_login_process/">Docker Login执行流程与原理</a></li>
+	
+	<li><a href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+	
+	<li><a href="/post/docker_image_scan/">Docker镜像扫描原理</a></li>
+	
+	<li><a href="/post/docker_storage_driver/">Docker镜像存储结构与原理</a></li>
+	
+	<li><a href="/post/docker_container_image/">Docker容器与镜像结构</a></li>
+	
+	<li><a href="/post/docker_data/">Docker容器数据文件管理</a></li>
+	
+	<li><a href="/post/dockerfile/">Dockerfile详解以及高级技巧</a></li>
+	
+	<li><a href="/post/postgresql/">PostgreSQL命令行操作</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/unicom_cat/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">破解联通HG8347R光猫</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/leader_elect_golang/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">基于数据库的简单Leader Elect</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

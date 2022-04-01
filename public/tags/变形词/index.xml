@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>变形词 on </title>
+    <link>/tags/%E5%8F%98%E5%BD%A2%E8%AF%8D/</link>
+    <description>Recent content in 变形词 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 16 Mar 2019 11:29:21 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E5%8F%98%E5%BD%A2%E8%AF%8D/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>判断两个单词是否为变形词</title>
+      <link>/post/check_deformation_word/</link>
+      <pubDate>Sat, 16 Mar 2019 11:29:21 +0800</pubDate>
+      
+      <guid>/post/check_deformation_word/</guid>
+      <description>问题 给定两个单词word1，word2，判断两个单词是否是变形词，即两个单词中的每个字符出现的次数一致。 word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;acbc&amp;rdquo;, 返回true word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;abbc&amp;rdquo;, 返回false word1=&amp;ldquo;abc&amp;rdquo;, word=&amp;ldquo;cba&amp;rdquo;, 返回true 思路 假定字符串的编码范围0~255。 新建一个size为256的int数组 分别将单词word1、word2转换为对应的字符数组word1C</description>
+    </item>
+    
+  </channel>
+</rss>

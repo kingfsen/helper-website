@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Harbor仓库镜像扫描原理 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="Harbor仓库镜像扫描原理分析">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Harbor仓库镜像扫描原理</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-03-11T15:59:41">2019-03-11</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/docker" rel="category">docker</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">9 分钟</time>
+</div></div>
+		</header>
+
+  
+    <div class="toc">
+        <div class="toc__title"><span id="toc_menu_tip">展开书签</span></div>
+        <div class="toc__menu">
+          <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#clair功能结构">Clair功能结构</a></li>
+<li><a href="#扫描触发机制">扫描触发机制</a></li>
+<li><a href="#harbor请求流程">Harbor请求流程</a></li>
+<li><a href="#clair扫描流程">Clair扫描流程</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>  
+    </div>
+    <script type="text/javascript">
+    $(".toc__title").click( function () {
+      if($(".toc__menu").css('display') == 'none') {
+        $(".toc__menu").show(); 
+        $("#toc_menu_tip").html("收起书签");
+      } else {
+        $(".toc__menu").hide(); 
+        $("#toc_menu_tip").html("展开书签");
+      }
+    });
+    </script>
+  
+<div class="content post__content clearfix">
+			
+
+<p>初次听说镜像扫描的人肯定有很多疑惑，总会想原理是什么呢？我们可以先思考下，windows控制面板、包括一些第三方软件比如三六零等，它们都能获取系统安装的软件以及版本，当然绿色解压版他们就无法识别，获取软件版本之后，他们就能提供一些升级的版本、以及当前软件版本的漏洞列举出来，由此可见，系统安装了哪些版本的软件，第三方都可以通过系统相关文件获取，那么Linux系统也一样。</p>
+
+<p>Harbor仓库中的镜像扫描这个功能，看似很高大上，其实等你了解了它的底层原理与流程，你就会发现就是做了那么一件事而已，用通俗的一句话概括，就是找到每个镜像文件系统中已经安装的软件包与版本，然后跟官方系统公布的信息比对，官方已经给出了在哪个系统版本上哪个软件版本有哪些漏洞，比如Debian 7系统上，nginx 1.12.1有哪些CVE漏洞，通过对逐个安装的软件包比对，就能知道当前这个镜像一共有多少CVE。下面就Harbor的具体流程进行简单介绍，让你对这个功能了如指掌。</p>
+
+<p>Harbor仓库中的镜像扫描功能是扩展功能，如果需要，只需启动的时候带上参数<code>./prepare --with-clair &amp;&amp; ./install.sh --with-clair</code>。Harbor镜像扫描功能依赖的第三方项目是coreos旗下的clair，项目地址：<a href="https://github.com/coreos/clair">https://github.com/coreos/clair</a> ,简单介绍下clair系统中几个核心功能结构。</p>
+
+<h3 id="clair功能结构">Clair功能结构</h3>
+
+<p><img src="/blog/harbor_image_scan/001.jpg" alt="clair功能结构" /></p>
+
+<ul>
+<li>API是clair对外提供的http api，harbor请求镜像扫描则是请求clair提供的http接口之一。</li>
+<li>notifier用来调用外部系统的webhook，当软件包的CVE被更新或者删除的时候，调用webhook通知第三方系统，消息中只有一个id。</li>
+
+<li><p>updater是clair中的定时任务，定期从各开源社区获取CVE数据，由于各开源社区维护的CEV结构各自不同，clair的每个fetcher只能fetch一个CVE数据源，然后调用对应的parser解析CVE数据，然后统一格式化，最后存入postgresql数据库中。clair系统中很多模块都是可以扩展的，提供了扩展接口，比如数据源、解析器等。系统首次启动去获取CVE数据源，由于全量更新耗时差不多1小时左右，后期都是增量更新，更新频率可以自由设置(单位小时)。</p>
+
+<h3 id="扫描触发机制">扫描触发机制</h3>
+
+<p>在了解镜像扫描之前，这里先简单说下镜像的概念，镜像就是由许多Layer层组成的文件系统，重要的是每个镜像有一个manifest，这个东西跟springboot中的manifest是同一个概念，就是文件清单的意思。一个镜像是由许多Layer组成，总需要这个manifest文件来记录下到底由哪些Layer层联合组成的。要扫描分析一个镜像，首先你就必须获取到这个镜像的manifest文件，通过manifest文件获取到镜像所有Layer层的地址digest，digest在docker镜像存储系统中代表的是一个地址，类似操作系统中的一个内存地址概念，通过这个地址，可以找到当前Layer层文件的内容，这种通过digest可寻址的设计是harbor v2版本的重大改变。在docker hub储存系统中，所有文件都是有地址的，这个digest就是由某种高效的sha算法通过对文件内容计算出来的，类似在linux上的md5sum命令，执行md5sum xx.txt，即可得到一个摘要。
+<img src="/blog/harbor_image_scan/002.jpg" alt="harbor扫描功能" /></p></li>
+</ul>
+
+<p>上图中，左边是harbor系统，右边是clair系统，左边的harbor只给出了与镜像扫描有交互的模块，并不是完整的功能结构，如需了解harbor的完整功能结构请参考另一篇文章 <a href="/post/deploy_harbor_service">部署Harbor镜像仓库服务</a> 。在harbor系统中有几个镜像扫描的触发点，当然根据参数设置，可以关闭系统触发扫描。</p>
+
+<ul>
+<li>每天定时全量扫描</li>
+<li>docker client执行docker push推送镜像成功之后，registry发送event通知harbor，harbor对当前的推送成功的镜像进行扫描</li>
+<li>系统启动的时候全量扫描</li>
+<li>http api请求扫描指定的镜像</li>
+</ul>
+
+<h3 id="harbor请求流程">Harbor请求流程</h3>
+
+<p>下面以用户调用harbor的http api触发镜像扫描为例，详解流程原理，先说harbor这一侧流程，后面再说clair接收到扫描请求的流程。</p>
+
+<ul>
+<li>用户请求harbor的/api/repositories/nginx/tags/1.12.1/scan接口，发起对版本为1.12.1的nginx进行镜像扫描。</li>
+<li>UI模块对用户操作权限认证通过之后，发起对Jobservice的post请求。</li>
+<li>Jobservice调用Registry校验该镜像的manifest成功之后，获取该manifest的digest，然后在数据库中生成一个初始状态的扫描job记录，同时把这个job加入到定时调度器中。</li>
+<li>Jobservice用digest为唯一键，在image_scan_overview表中插入一条存放记录，待获取到扫描结果之后更新对应的扫描结果字段，Jobservice将job状态修改为Running，状态机模式开始处理。</li>
+<li>Jobservice调用UI模块生成请求registry的token令牌，该token中包括对该镜像的一个操作权限(push、pull)，同时根据digest调用Registry获取镜像的manifest文件内容，解析manifest。</li>
+
+<li><p>构造请求扫描系统Clair的请求参数，将镜像的每一层参数封装成ClairLayer结构。</p>
+
+<pre><code class="language-Go">l := models.ClairLayer{
+            Name:    fmt.Sprintf(&quot;%x&quot;, sha256.Sum256([]byte(shaChain))),
+            Headers: tokenHeader,
+            Format:  &quot;Docker&quot;,
+            Path:    utils.BuildBlobURL(registryEndpoint, iz.Context.Repository, string(d.Digest)),
+        }
+        if len(iz.Context.layers) &gt; 0 {
+            l.ParentName = iz.Context.layers[len(iz.Context.layers)-1].Name
+        }
+</code></pre>
+
+<p>通过相应的算法sha256.Sum256计算Name，保证镜像的每一层Layer在Clair系统中都具备唯一标志，Headers则包含了clair请求Registry必备的请求头信息，最重要的是上一步生成的token令牌，Path则是镜像的每一层在Registry中的下载地址，除了镜像的基础层，其他每一层都维护着父子关系，参数demo如下:</p>
+
+<pre><code class="language-Text">Name:    sha256:7d99455a045a6c89c0dbee6e1fe659eb83bd3a19e171606bc0fd10eb0e34a7dc
+Headers: tokenHeader,
+Format:  &quot;Docker&quot;,
+Path:    http://registry:5000/v2/nginx/blobs/7d99455a045a6c89c0dbee6e1fe659eb83bd3a19e171606bc0fd10eb0e34a7dc
+ParentName: a55bba68cd4925f13c34562c891c8c0b5d446c7e3d65bf06a360e81b993902e1
+</code></pre>
+
+<p>这里的Name并不是Layer的digest，每一层的Name都是它的digest与它所有的直接父级以及间接父级digest拼接起来，再通过sha256.Sum256生成的。所有的参数准备完毕之后，循环每一个layer，逐层调用Clair的http接口请求扫描，每个请求都是同步等待结果，只要有一个Layer请求返回失败，则马上退出状态机，同时更新该job的状态为error，所有Layer请求都成功只后，则开始用最后一层的Name请求Clair获取扫描结果，Clair会返回该Name对应的所有parent的扫描结果信息，获取扫描结果之后，Jobservice退出状态机，同时更新job状态为success，扫描结果表image_scan_overview，Harbor的页面则可以直接从自身数据库获取扫描结果了。</p></li>
+</ul>
+
+<h3 id="clair扫描流程">Clair扫描流程</h3>
+
+<ul>
+<li>clair接收harbor发起的http post镜像扫描请求，同时进行基本的参数校验。</li>
+<li>clair利用请求参数中的token headers，直接对Registry的path发起请求，下载镜像层文件，然后解析镜像文件内容，得到一个filesMap。</li>
+
+<li><p>探测镜像操作系统，遍历解压后的文件目录，探测操作系统文件路径。 首先要了解各Linux发行版的一些基础文件，比如系统版本、安装的软件包版本记录等文件，比如centos</p>
+
+<pre><code>centos：etc/os-release,usr/lib/os-release
+</code></pre>
+
+<p>查看文件/etc/os-release文件内容</p>
+
+<pre><code class="language-Bash">NAME=&quot;CentOS Linux&quot;
+VERSION=&quot;7 (Core)&quot;
+ID=&quot;centos&quot;
+ID_LIKE=&quot;rhel fedora&quot;
+VERSION_ID=&quot;7&quot;
+PRETTY_NAME=&quot;CentOS Linux 7 (Core)&quot;
+ANSI_COLOR=&quot;0;31&quot;
+CPE_NAME=&quot;cpe:/o:centos:centos:7&quot;
+HOME_URL=&quot;https://www.centos.org/&quot;
+BUG_REPORT_URL=&quot;https://bugs.centos.org/&quot;
+     
+CENTOS_MANTISBT_PROJECT=&quot;CentOS-7&quot;
+CENTOS_MANTISBT_PROJECT_VERSION=&quot;7&quot;
+REDHAT_SUPPORT_PRODUCT=&quot;centos&quot;
+REDHAT_SUPPORT_PRODUCT_VERSION=&quot;7&quot;
+</code></pre>
+
+<p>clair利用针对centos的解析器逐行解析该文件，提取ID以及VERSION_ID字段，最终把centos:7作为clair中的一个namespace概念。</p>
+
+<ul>
+<li><p>探测已安装的软件包，上一步已经探测到了操作系统，自然可以知道系统的软件管理包是rpm还是dpkg。</p>
+
+<pre><code>debian, ubuntu : dpkg
+centos, rhel, fedora, amzn, ol, oracle : rpm
+</code></pre></li>
+</ul>
+
+<p>centos系统的软件管理包是rpm，而debain系统的软件管理是dpkg，获取软件管理工具之后，则可以在操作系统对应的路径下获取当前系统已安装了哪些包。</p>
+
+<pre><code>rpm：var/lib/rpm/Packages
+dpkg：var/lib/dpkg/status
+apk：lib/apk/db/installed
+</code></pre>
+
+<p>比如debian系统，从文件/var/lib/dpkg/status文件则可以探测到当前系统安装了哪些版本的软件，安装文件清单内容格式如下，由于篇幅有限，只截取了两个安装包展示。</p>
+
+<pre><code class="language-Bash">Package: sed
+Essential: yes
+Status: install ok installed
+Priority: required
+Section: utils
+Installed-Size: 799
+Maintainer: Clint Adams &lt;clint@debian.org&gt;
+Architecture: amd64
+Multi-Arch: foreign
+Version: 4.4-1
+Pre-Depends: libc6 (&gt;= 2.14), libselinux1 (&gt;= 1.32)
+Description: GNU stream editor for filtering/transforming text
+ sed reads the specified files or the standard input if no
+ files are specified, makes editing changes according to a
+ list of commands, and writes the results to the standard
+ output.
+Homepage: https://www.gnu.org/software/sed/
+     
+Package: libsmartcols1
+Status: install ok installed
+Priority: required
+Section: libs
+Installed-Size: 257
+Maintainer: Debian util-linux Maintainers &lt;ah-util-linux@debian.org&gt;
+Architecture: amd64
+Multi-Arch: same
+Source: util-linux
+Version: 2.29.2-1+deb9u1
+Depends: libc6 (&gt;= 2.17)
+Description: smart column output alignment library
+ This smart column output alignment library is used by fdisk utilities.
+</code></pre>
+
+<p>Clair又采取指定的解析器，对该文件逐行解析，提取Package以及Version字段，最终获取 libsmartcols1 2.29-1+deb9u1以及sed 4.4-1等重要属性信息。</p></li>
+
+<li><p>数据持久化，把上面探测到的系统版本、以及系统上安装的各种软件包版本都存入数据库。Clair系统已经获取了各linux版本操作系统软件版本，以及对应软件版本存在的CVE。官方公布了某个软件在某个版本修复了哪个CVE，Clair只需要将当前镜像中的软件的版本与官方公布的版本进行比较。比如官方维护的CVE信息中公布了nginx 1.13.1修复了漏洞CVE-2015-10203，那么当前镜像中包含的版本为1.12.1的nginx必然存在漏洞CVE-2015-10203，这些版本比较都是基于同一个版本的操作系统之上比较的。</p></li>
+</ul>
+
+<p>harbor页面具体的漏洞详细数据展示，还是通过UI系统调用Clair系统实时查询。</p>
+
+<p><img src="/blog/harbor_image_scan/003.jpg" alt="harbor扫描详情" /></p>
+
+<p>综上，我们可以完全扩展一下clair，并不局限于只扫描镜像，它扫描镜像的原理无非是提取了操作系统的安装清单，然后进行信息比对。</p>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/harbor/" rel="tag">harbor</a></li>
+		<li class="tags__item"><a class="tags__link btn" href="/tags/clair/" rel="tag">clair</a></li>
+		<li class="tags__item"><a class="tags__link btn" href="/tags/%E9%95%9C%E5%83%8F%E6%89%AB%E6%8F%8F/" rel="tag">镜像扫描</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+	
+	<li><a href="/post/harbor_base/">开源Harbor功能结构</a></li>
+	
+	<li><a href="/post/docker_image_scan/">Docker镜像扫描原理</a></li>
+	
+	<li><a href="/post/cve/">Docker镜像扫描之CVE漏洞数据源</a></li>
+	
+	<li><a href="/post/helm_harbor/">Helm Harbor</a></li>
+	
+	<li><a href="/post/docker_login_process/">Docker Login执行流程与原理</a></li>
+	
+	<li><a href="/post/deploy_harbor_service/">部署企业级Harbor镜像仓库服务</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/leader_elect_golang/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">基于数据库的简单Leader Elect</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/docker_deploy_wordpress/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">基于Docker快速搭建wordpress博客</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

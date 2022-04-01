@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>二叉树 on </title>
+    <link>/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/</link>
+    <description>Recent content in 二叉树 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 24 Mar 2019 16:01:34 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E4%BA%8C%E5%8F%89%E6%A0%91/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>递归与非递归遍历二叉树</title>
+      <link>/post/tree_traverse/</link>
+      <pubDate>Sun, 24 Mar 2019 16:01:34 +0800</pubDate>
+      
+      <guid>/post/tree_traverse/</guid>
+      <description>二叉树的遍历有三种方法，分别是先序、中序、后序，先序遍历顺序为根、左、右，中序遍历顺序为左、根、右，后序遍历顺序为左、右、根。 遍历二叉树的方式又包括递归、非递归两种方式。 先序遍历结果：50、30、20、40、60 中序遍历结果：20、30、40、50、60 后序遍历结果：20、40、30、60</description>
+    </item>
+    
+    <item>
+      <title>二叉树</title>
+      <link>/post/binary_tree_base/</link>
+      <pubDate>Sat, 23 Mar 2019 09:55:45 +0800</pubDate>
+      
+      <guid>/post/binary_tree_base/</guid>
+      <description>先简单了解下有序数组和链表两种数据结构 有序数组 优点：用二分查找法可以在有序数组中快速查找特定的值，时间O(logN)，当然按顺序遍历也只是O(N) 缺点：插入或者删除，需要多次移动数据项，平均要移动N/2次，不适合发生很多插入或者删除操作的场景 链表 优点：链表的插入和删除都非常快，时间O(1)</description>
+    </item>
+    
+  </channel>
+</rss>

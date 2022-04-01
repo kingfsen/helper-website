@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Condition on </title>
+    <link>/tags/condition/</link>
+    <description>Recent content in Condition on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 12 Dec 2019 11:43:39 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/condition/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Java同步器框架AQS与锁实现原理</title>
+      <link>/post/juc/</link>
+      <pubDate>Thu, 12 Dec 2019 11:43:39 +0800</pubDate>
+      
+      <guid>/post/juc/</guid>
+      <description>JUC是Java中并发控制的核心包，其中AQS是并发的基础核心类，类名全称AbstractQueuedSynchronizer，其父类是AbstractOwnableSynchronizer(AOS)， 用于存取获得独占锁的线程。Java中的ReentrantLock、CountDownLa</description>
+    </item>
+    
+  </channel>
+</rss>

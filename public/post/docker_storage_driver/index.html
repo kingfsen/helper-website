@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Docker镜像存储结构与原理 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="详细介绍Docker当前常用的storage sriver以及Docker如何管理和存储镜像文件">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Docker镜像存储结构与原理</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-04-25T14:21:03">2019-04-25</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/docker" rel="category">docker</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">9 分钟</time>
+</div></div>
+		</header>
+
+  
+<div class="content post__content clearfix">
+			<p>Docker容器镜像存在哪儿，怎么存放?</p>
+
+<hr />
+
+<p>Docker容器在运行的过程中，只有小部分的数据可能需要写到容器可写层，因为大部分场景下，我们可以通过Docker volumes来写数据，
+但是某些场景下，就是需要往容器可写层写数据，这就是Docker存储驱动Storage Driver出现的原因，这些存储驱动必须是采用层堆叠以及<code>copy-on-write</code>策略。</p>
+
+<p>Docker采用可插拔的方式支持一些不同的存储驱动，存储驱动控制了镜像和容器在宿主机上如何管理以及存储。如果系统内核支持多种存储驱动，在没有明确设置
+存储驱动时，Docker会根据优先级<code>(btrfs,zfs,overlay2,aufs,overlay,devicemapper,vfs)</code>顺序进行选择，排在前面的储存驱动并不总是会被Docker采用，
+因为有些存储驱动对文件系统或者内核有硬性要求。</p>
+
+<hr />
+
+<p>Docker支持如下storage driver:</p>
+
+<ul>
+<li><p><strong>overlay2</strong> <br/>
+Docker优先采用的存储驱动，对于已支持该驱动的Linux发行版，不需要任何进行任何额外的配置。</p></li>
+
+<li><p><strong>aufs</strong> <br/>
+Docker 18.06以下版本运行在Ubuntu 14.04以及kernel 3.13上，不支持<code>overlay2</code>，首选<code>aufs</code>。</p></li>
+
+<li><p><strong>devicemapper</strong> <br/>
+默认的配置模式是<code>loopback-lvm</code>，但是在生产环境时Docker不推荐这种模式，它的性能非常差，我们需要将其配置成<code>direct-lvm</code>。
+对于早期的CentOS和RHEL，<code>devicemapper</code>是推荐的存储驱动，因为它们对应的内核版本不支持<code>overlay2</code>，不过，我们现在版本的CentOS与RHEL均已支持<code>overlay2</code>。</p></li>
+
+<li><p><strong>btrfs and zfs</strong> <br/>
+Docker安装所在的宿主机文件系统是<code>btrfs</code>或者<code>zfs</code>，则Docker优先使用它们作为存储驱动，这些文件系统具有一些高级的选项配置，比如创建快照(snapshots)等。</p></li>
+
+<li><p><strong>vfs</strong> <br/>
+Docker不推荐用于生产环境，只用于测试，性能比较差，可能无法支持copy-on-write策略。</p></li>
+</ul>
+
+<hr />
+
+<blockquote>
+<ul>
+<li>注意一些存储驱动要求使用特殊版本的文件系统，比如<code>aufs</code>仅在<code>Ubuntu</code>或者<code>Debian</code>系统被支持, 并且需要安装一些额外的依赖包，而<code>btrfs</code>仅在<code>SLES</code>被支持。</li>
+</ul>
+</blockquote>
+
+<hr />
+
+<p>我们大多数人使用的应该都是Docker社区版本，下面列举了社区版Docker引擎在各Linux发行版中推荐的存储驱动。</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">Linux发行版</th>
+<th align="left">推荐的存储驱动</th>
+<th align="left">备选存储驱动</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">Ubuntu</td>
+<td align="left"><code>overlay2</code>、<br/><code>aufs</code>(运行在内核3.13上的Ubuntu 14.04)</td>
+<td align="left"><code>overlay</code>、<code>devicemapper</code>、<br/><code>zfs</code>、<code>vfs</code></td>
+</tr>
+
+<tr>
+<td align="left">Debian</td>
+<td align="left"><code>overlay2</code>(Debian扩展版本)、<br/><code>aufs</code>、<code>devicemapper</code>(老版本)</td>
+<td align="left"><code>overlay</code>、<code>vfs</code></td>
+</tr>
+
+<tr>
+<td align="left">CentOS</td>
+<td align="left"><code>overlay2</code></td>
+<td align="left"><code>overlay</code>、<code>devicemapper</code>、<br/><code>zfs</code>、<code>vfs</code></td>
+</tr>
+
+<tr>
+<td align="left">Fedora</td>
+<td align="left"><code>overlay2</code></td>
+<td align="left"><code>overlay</code>、<code>devicemapper</code>、<br/><code>zfs</code>、<code>vfs</code></td>
+</tr>
+</tbody>
+</table>
+
+<blockquote>
+<ul>
+<li><code>overlay</code> storage driver已经在Docker引擎(企业版)18.09中被废弃，它在未来的发行包中将被移除，Docker推荐使用<code>overlay</code>存储驱动的用户迁移到<code>overlay2</code>。</li>
+<li><code>devicemapper</code> storage driver已经在Docker引擎18.09版本中被废弃，它在未来的发行包中将被移除，Docker推荐使用<code>devicemapper</code>存储驱动的用户迁移到<code>overlay2</code>。</li>
+</ul>
+</blockquote>
+
+<p>总之，Docker推荐使用的storage driver是<code>overlay2</code>，Docker安装时默认选择<code>overlay2</code>，对于Docker不推荐使用的storage driver，可以通过强制手动设置使用，可能会出现一些
+意想不到的错误，上面介绍的这些都是基于Linux平台，不可能支持Windows或Mac平台。</p>
+
+<hr />
+
+<p>Docker存储驱动需要文件系统结构的支持:</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">存储驱动</th>
+<th align="left">支持的文件系统</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left"><code>overlay2</code>、 <code>overlay</code></td>
+<td align="left"><code>xfs</code>(with ftype=1)、<code>ext4</code></td>
+</tr>
+
+<tr>
+<td align="left"><code>aufs</code></td>
+<td align="left"><code>xfs</code>、<code>ext4</code></td>
+</tr>
+
+<tr>
+<td align="left"><code>devicemapper</code></td>
+<td align="left"><code>direct-lvm</code></td>
+</tr>
+
+<tr>
+<td align="left"><code>btrfs</code></td>
+<td align="left"><code>btrfs</code></td>
+</tr>
+
+<tr>
+<td align="left"><code>zfs</code></td>
+<td align="left"><code>zfs</code></td>
+</tr>
+
+<tr>
+<td align="left"><code>vfs</code></td>
+<td align="left">any filesystem</td>
+</tr>
+</tbody>
+</table>
+
+<p>Docker各存储驱动的一些特点:</p>
+
+<ul>
+<li><code>overlay2</code>、<code>aufs</code>、<code>overlay</code> 基于文件级操作，使用内存效率高，在大量写场景下容器可写层会变得非常大。</li>
+<li><code>devicemapper</code>、<code>btrfs</code>、<code>zfs</code> 基于block级操作，在大量写场景下性能更好。</li>
+<li>很少发生写操作同时镜像层数又很多的场景下，<code>overlay</code>表现的比<code>overlay2</code>更好，但是<code>overlay</code>会消耗更多的inodes，可能导致inode瓶颈。</li>
+<li><code>btrfs</code>、<code>zfs</code>需要大量的内存支持。</li>
+</ul>
+
+<hr />
+
+<p>查看当前Docker的存储驱动</p>
+
+<pre><code class="language-docker">[~]# docker info
+Containers: 8
+ Running: 8
+ Paused: 0
+ Stopped: 0
+Images: 80
+Server Version: 18.09.2
+Storage Driver: overlay2
+ Backing Filesystem: extfs
+ Supports d_type: true
+ Native Overlay Diff: false
+Logging Driver: json-file
+Cgroup Driver: cgroupfs
+</code></pre>
+
+<p>Docker的storage driver是<code>overlay2</code>，文件系统是<code>ext4</code>，可通过命令<code>cat /etc/fstab</code>查看有效的文件系统详细信息。
+Docker以插拔式结构支持多种storage driver，但是各storage driver都使用镜像层叠以及copy-on-write策略来达到相同的效果，
+下面具体介绍Docker推荐的<code>overlay2</code>工作原理，了解<code>overlay2</code>之后，便能理解Docker镜像以及容器的组织结构。</p>
+
+<p><code>OverlayFS</code>是一种比较先进的联合文件系统，比起<code>AUFS</code>，它的速度更快，实现起来相对更简单。Docker提供了两种实现，<code>overlay</code>是最初的版本实现，
+<code>overlay2</code>是新版本实现，更稳定。<code>overlay2</code>要求内核4.0以上，或者RHEL、CentOS 3.10.0-514以上版本，通过命令<code>uname -a</code>查看。</p>
+
+<hr />
+
+<p>Docker在运行一段时间之后，如果手动修改了storage driver，那本地系统中的Docker镜像以及容器均无法进入，无法查看，当storage driver再次切换回来时，
+之前的镜像与容器可再次使用，Docker根目录下的文件系统，我们不应该进行任何手动操作，它应该被Docker自动管理。</p>
+
+<p>修改Docker的storage driver</p>
+
+<ul>
+<li><p>暂停Docker服务</p>
+
+<pre><code class="language-bash">systemctl stop docker
+</code></pre>
+
+<ul>
+<li>备份Docker根目录(/var/lib/docker)</li>
+</ul>
+
+<pre><code class="language-bash">cp -au /var/lib/docker /var/lib/docker.bk
+</code></pre></li>
+
+<li><p>编辑Docker配置文件/etc/docker/daemon.json，不存在则新建，增加storage driver配置。</p>
+
+<pre><code class="language-bash">{
+  &quot;storage-driver&quot;: &quot;overlay2&quot;
+}
+</code></pre>
+
+<ul>
+<li>启动Docker</li>
+</ul>
+
+<pre><code class="language-bash">systemctl start docker
+</code></pre></li>
+</ul>
+
+<p>通过<code>docker info</code>命令查看Docker存储驱动是否已经变更。</p>
+
+<hr />
+
+<p><strong>overlay2工作原理</strong></p>
+
+<p><code>OverlayFS</code>在单台Linux上将两个目录进行层叠处理，最终将他们显示为另外一个单独的目录视图，这些被处理的每个目录都被称为层，视图统一的过程则称为联合挂载。
+多个目录进行层叠，肯定具有上下层关系，<code>OverlayFS</code>将下层的目录称为<code>lowerdir</code>，上层的目录称为<code>upperdir</code>，被暴露的统一视图目录称为<code>merged</code>。
+<code>overlay2</code>支持<code>OverlayFS</code>中的下层数目最大为<code>128</code>，通过<code>docker build</code>或者<code>docker commit</code>命令构建镜像时勿设置过多层。</p>
+
+<p><img src="/blog/docker_data/002.png" alt="docker_data" /></p>
+
+<p>下面以拉取ubuntu:latest镜像为例，讲解其在本地存储结构。</p>
+
+<pre><code class="language-docker">docker pull ubuntu
+Using default tag: latest
+latest: Pulling from library/ubuntu
+898c46f3b1a1: Pull complete 
+63366dfa0a50: Pull complete 
+041d4cd74a92: Pull complete 
+6e1bee0f8701: Pull complete 
+Digest: sha256:017eef0b616011647b269b5c65826e2e2ebddbe5d1f8c1e56b3599fb14fabec8
+Status: Downloaded newer image for ubuntu:latest
+</code></pre>
+
+<p>ubuntu:latest镜像一共有<code>4</code>层，那么在Docker的层文件系统中则会生成<code>5</code>个文件夹。</p>
+
+<pre><code class="language-bash">drwx------ 3 root root  4096 Apr 26 15:04 9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b
+drwx------ 4 root root  4096 Apr 26 15:04 c47ec19c6123f5a75d9afbe9d9a631ecaa3469ad670bbb2b1b9ce5e64e361c7d
+drwx------ 4 root root  4096 Apr 26 15:04 e8381b82a136d9cbad47970923b3dec9d6abaaffe08268a326ccf114a4f46d06
+drwx------ 4 root root  4096 Apr 26 15:04 4a00cadd4488f55ad2378a9d2d915dcff733244fc96217b89f827c5f8959b34b
+drwx------ 2 root root 20480 Apr 26 15:04 l
+</code></pre>
+
+<p>这个<code>l</code>目录中都是对应镜像层id的短标识符，都是对镜像层内容目录<code>diff</code>的一个符号链接，作用就是防止在使用<code>mount</code>命令时参数过长，这取决于你的Docker根目录长度，
+默认<code>/var/lib/docker</code>。</p>
+
+<pre><code class="language-bash">I7KQTMK5P2FJUBEVF5AG4YX7OI -&gt; ../9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b/diff
+6W32BOAFLZDOGIACBFAYPIMFWU -&gt; ../c47ec19c6123f5a75d9afbe9d9a631ecaa3469ad670bbb2b1b9ce5e64e361c7d/diff
+N2VPKSUXNXCWKUOSWR2HXFLWME -&gt; ../e8381b82a136d9cbad47970923b3dec9d6abaaffe08268a326ccf114a4f46d06/diff
+TFMVIO6TPMR4AGFI2O2TWAWZQ7 -&gt; ../4a00cadd4488f55ad2378a9d2d915dcff733244fc96217b89f827c5f8959b34b/diff
+</code></pre>
+
+<p>每个镜像层目录中包含了一个文件<code>link</code>，文件内容则是当前层对应的短标识符，镜像层的内容则存放在<code>diff</code>目录，查看ubuntu:latest第一层，也就是最下层目录。</p>
+
+<pre><code class="language-bash">[root@vm ]#ls /var/lib/docker/overlay2/9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b
+[root@vm 9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b]# ls
+diff  link
+[root@vm 9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b]# cat link
+I7KQTMK5P2FJUBEVF5AG4YX7OI
+[root@vm 9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b]# ls diff
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+</code></pre>
+
+<p>从镜像最底层的往上每一层，都包含一个文件<code>lower</code>指向了其所有的父层，其文件内容则是父层id的短标识符。
+其中<code>diff</code>目录包含了镜像层内容，<code>work</code>目录被<code>OverlayFS</code>内部使用。</p>
+
+<pre><code class="language-bash">[root@vm9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b]# cd ../c47ec19c6123f5a75d9afbe9d9a631ecaa3469ad670bbb2b1b9ce5e64e361c7d
+[root@vm c47ec19c6123f5a75d9afbe9d9a631ecaa3469ad670bbb2b1b9ce5e64e361c7d]# ls
+diff  link  lower  work
+[root@vm c47ec19c6123f5a75d9afbe9d9a631ecaa3469ad670bbb2b1b9ce5e64e361c7d]# cat lower
+l/I7KQTMK5P2FJUBEVF5AG4YX7OI
+[root@vm c47ec19c6123f5a75d9afbe9d9a631ecaa3469ad670bbb2b1b9ce5e64e361c7d]# cd diff
+[root@vm diff]# ls
+etc  sbin  usr  var
+</code></pre>
+
+<p>最上层镜像4a00cadd4488f55ad2378a9d2d915dcff733244fc96217b89f827c5f8959b34b的<code>lower</code>文件内容</p>
+
+<pre><code class="language-bash">l/N2VPKSUXNXCWKUOSWR2HXFLWME:l/6W32BOAFLZDOGIACBFAYPIMFWU:l/I7KQTMK5P2FJUBEVF5AG4YX7OI
+</code></pre>
+
+<p>下面启动一个运行ubuntu:latest镜像的容器</p>
+
+<pre><code class="language-docker">docker run -it -d --name ubuntu ubuntu
+</code></pre>
+
+<p>容器启动之后，查看/var/lib/docker/overlay2目录，发现多了两个目录。</p>
+
+<pre><code class="language-bash">drwx------ 4 root root  4096 Apr 26 16:11 8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0-init
+drwx------ 5 root root  4096 Apr 26 16:11 8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0
+</code></pre>
+
+<p>首先进入init目录，查看其<code>lower</code>文件内容，正是<code>4</code>个镜像层短标识符，但是这一层并不是容器层，而是Docker在启动容器时默认加的一个辅助层，
+用于给容器配置host等运行时的相关信息。</p>
+
+<pre><code class="language-bash">[root@vm 8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0-init]# ls
+diff  link  lower  work
+[root@vm 8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0-init]# cat lower
+l/TFMVIO6TPMR4AGFI2O2TWAWZQ7:l/N2VPKSUXNXCWKUOSWR2HXFLWME:l/6W32BOAFLZDOGIACBFAYPIMFWU:l/I7KQTMK5P2FJUBEVF5AG4YX7OI
+</code></pre>
+
+<p>再查看不带init尾缀的目录</p>
+
+<pre><code class="language-bash">[root@vm 8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0]# ls
+diff  link  lower  merged  work
+[root@vm 8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0]# cd diff
+[root@vm diff]# cat ../lower
+l/MGUMOBQVXCENNH3EYBVSA3FXIP:l/TFMVIO6TPMR4AGFI2O2TWAWZQ7:l/N2VPKSUXNXCWKUOSWR2HXFLWME:l/6W32BOAFLZDOGIACBFAYPIMFWU:l/I7KQTMK5P2FJUBEVF5AG4YX7OI
+[root@vm diff]# cd ../merged
+[root@vm merged]# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var
+</code></pre>
+
+<p>这个目录比镜像层目录多了一个子目录<code>merged</code>，这个<code>merged</code>目录则是这些镜像层以及容器层挂载之后的统一视图目录，
+也就是进入容器之后能看见的文件系统了。为了验证一下，我这里手动在当前<code>merged</code>目录新建一个youendless.txt文本(这里仅用于测试，请勿手动操作Docker存储目录)，
+然后进入容器中查看是否存在。</p>
+
+<pre><code class="language-bash">[root@vm ~]# docker exec -it 7334cfbc206d sh
+# ls
+bin  boot  dev  etc  home  lib  lib64  media  mnt  opt  proc  root  run  sbin  srv  sys  tmp  usr  var youendless.txt
+# pwd
+/
+</code></pre>
+
+<p>在上面容器中通过命令<code>touch okk.txt</code>新增一个文本文件，然后查看8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0的diff目录，</p>
+
+<pre><code class="language-bash">[root@vm1 diff]# cd /var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/diff
+[root@vm1 diff]# ls
+okk.txt  youendless.txt
+</code></pre>
+
+<p>很显然，这个目录才是真正的容器层目录，到这里，想必已经深刻理解了Docker镜像以及容器组织结构关系了，
+当然不同的Docker版本在处理方式有差别，有些版本可能在每一层包括容器层就生成一个<code>merged</code>目录，作为当前层与其父层的统一视图。</p>
+
+<p>执行命令查看overlay联合挂载信息</p>
+
+<pre><code class="language-bash">[root@vm /]# mount | grep '8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/merged'
+overlay on /var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/merged type overlay (rw,relatime,
+lowerdir=/var/lib/docker/overlay2/l/MGUMOBQVXCENNH3EYBVSA3FXIP:/var/lib/docker/overlay2/l/TFMVIO6TPMR4AGFI2O2TWAWZQ7:/var/lib/docker/overlay2/l/N2VPKSUXNXCWKUOSWR2HXFLWME:/var/lib/docker/overlay2/l/6W32BOAFLZDOGIACBFAYPIMFWU:/var/lib/docker/overlay2/l/I7KQTMK5P2FJUBEVF5AG4YX7OI,
+upperdir=/var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/diff,
+workdir=/var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/work)
+</code></pre>
+
+<p>查看容器信息(忽略无关信息)</p>
+
+<pre><code class="language-docker">&quot;GraphDriver&quot;: {
+    &quot;Data&quot;: {
+        &quot;LowerDir&quot;: &quot;/var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0-init/diff:/var/lib/docker/overlay2/4a00cadd4488f55ad2378a9d2d915dcff733244fc96217b89f827c5f8959b34b/diff:/var/lib/docker/overlay2/e8381b82a136d9cbad47970923b3dec9d6abaaffe08268a326ccf114a4f46d06/diff:/var/lib/docker/overlay2/c47ec19c6123f5a75d9afbe9d9a631ecaa3469ad670bbb2b1b9ce5e64e361c7d/diff:/var/lib/docker/overlay2/9955b547c10c465488960ecba07dcb8ace596c972e3ad8d391afc20cb6aab46b/diff&quot;,
+        &quot;MergedDir&quot;: &quot;/var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/merged&quot;,
+        &quot;UpperDir&quot;: &quot;/var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/diff&quot;,
+        &quot;WorkDir&quot;: &quot;/var/lib/docker/overlay2/8985decfb3a78124f061c6d5995a158ca7126c7ccdf4ab7d66853107fb55b4a0/work&quot;
+    }
+</code></pre>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/docker/" rel="tag">docker</a></li>
+		<li class="tags__item"><a class="tags__link btn" href="/tags/overlay/" rel="tag">overlay</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+	
+	<li><a href="/post/harbor_base/">开源Harbor功能结构</a></li>
+	
+	<li><a href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+	
+	<li><a href="/post/docker_image_scan/">Docker镜像扫描原理</a></li>
+	
+	<li><a href="/post/docker_container_image/">Docker容器与镜像结构</a></li>
+	
+	<li><a href="/post/docker_data/">Docker容器数据文件管理</a></li>
+	
+	<li><a href="/post/dockerfile/">Dockerfile详解以及高级技巧</a></li>
+	
+	<li><a href="/post/postgresql/">PostgreSQL命令行操作</a></li>
+	
+	<li><a href="/post/docker_login_process/">Docker Login执行流程与原理</a></li>
+	
+	<li><a href="/post/docker_deploy_wordpress/">基于Docker快速搭建wordpress博客</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/docker_container_image/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">Docker容器与镜像结构</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/cve/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">Docker镜像扫描之CVE漏洞数据源</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

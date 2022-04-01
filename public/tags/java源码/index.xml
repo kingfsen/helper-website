@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Java源码 on </title>
+    <link>/tags/java%E6%BA%90%E7%A0%81/</link>
+    <description>Recent content in Java源码 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Mon, 25 Mar 2019 16:31:58 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/java%E6%BA%90%E7%A0%81/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>FutureTask原理分析</title>
+      <link>/post/futuretask/</link>
+      <pubDate>Mon, 25 Mar 2019 16:31:58 +0800</pubDate>
+      
+      <guid>/post/futuretask/</guid>
+      <description>Callable Runnable 在Java中可以通过继承Thread或者实现Runnable接口两种方式来创建多线程，这两种方式创建的线程执行完毕之后，我们无法获取执行结果， 除非通过共享变量或者线程通信方式(Q消息等)间接实现，Java在1.5之后可以通过Callable和Future接口在线程执行完毕之后获取执行结</description>
+    </item>
+    
+  </channel>
+</rss>

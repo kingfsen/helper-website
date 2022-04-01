@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>数组 on </title>
+    <link>/tags/%E6%95%B0%E7%BB%84/</link>
+    <description>Recent content in 数组 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 13 Mar 2019 20:41:18 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E6%95%B0%E7%BB%84/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>从数组中获取指定数量的随机元素</title>
+      <link>/post/get_random_number_from_array/</link>
+      <pubDate>Wed, 13 Mar 2019 20:41:18 +0800</pubDate>
+      
+      <guid>/post/get_random_number_from_array/</guid>
+      <description>问题 从给定的一个整型数组中，随机获取指定数量的数组元素。 思路一 新建一个与整型数组相同长度的boolean类型数组用来做标志位，标志位值为true表示当前元素是否已经获取，如果数组元素未被获取，则取出该元素，同时把对应的标志位置位true，如果发现当前元素已经获取，则重新随机获取。 public static int[] get(int[] array,</description>
+    </item>
+    
+  </channel>
+</rss>

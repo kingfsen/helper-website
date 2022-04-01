@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Hugo入门详细教程 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="介绍Hugo生成静态网站的基础知识，让你快速入门，轻松部署属于自己的静态站点">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Hugo入门详细教程</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-03-31T12:54:26">2019-03-31</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6" rel="category">博客组件</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">7 分钟</time>
+</div></div>
+		</header>
+
+  
+    <div class="toc">
+        <div class="toc__title"><span id="toc_menu_tip">展开书签</span></div>
+        <div class="toc__menu">
+          <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#目录结构">目录结构</a></li>
+<li><a href="#配置主题">配置主题</a></li>
+<li><a href="#站点部署">站点部署</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>  
+    </div>
+    <script type="text/javascript">
+    $(".toc__title").click( function () {
+      if($(".toc__menu").css('display') == 'none') {
+        $(".toc__menu").show(); 
+        $("#toc_menu_tip").html("收起书签");
+      } else {
+        $(".toc__menu").hide(); 
+        $("#toc_menu_tip").html("展开书签");
+      }
+    });
+    </script>
+  
+<div class="content post__content clearfix">
+			
+
+<p>首先访问Github下载Hugo的应用程序，Hugo各版本release文件下载地址 <a href="https://github.com/gohugoio/hugo/releases">https://github.com/gohugoio/hugo/releases</a> ， windows请选择下载hugo_0.xx.0_Windows-64bit.zip。
+下载完成止之后解压文件至D:\soft\hugo_0.54，然后把该路径添加到系统环境变量Path中，执行 hugo version 命令验证是否安装成功。</p>
+
+<pre><code>C:\Users\kingfsen&gt;hugo version
+Hugo Static Site Generator v0.54.0-B1A82C61 windows/amd64 BuildDate: 2019-02-01T09:42:02Z
+</code></pre>
+
+<p>通过执行 hugo &ndash;help 查看命令帮助</p>
+
+<pre><code class="language-Bash">C:\Users\kingfsen&gt;hugo --help
+hugo is the main command, used to build your Hugo site.
+
+Hugo is a Fast and Flexible Static Site Generator
+built with love by spf13 and friends in Go.
+
+Complete documentation is available at http://gohugo.io/.
+
+Usage:
+  hugo [flags]
+  hugo [command]
+
+Available Commands:
+  config      Print the site configuration
+  convert     Convert your content to different formats
+  env         Print Hugo version and environment info
+  gen         A collection of several useful generators.
+  help        Help about any command
+  import      Import your site from others.
+  list        Listing out various types of content
+  new         Create new content for your site
+  server      A high performance webserver
+  version     Print the version number of Hugo
+</code></pre>
+
+<p>执行 <code>hugo config</code>查看hugo的默认配置信息，各配置参数可以通过在站点的全局配置文件config.toml中进行修改。</p>
+
+<h3 id="目录结构">目录结构</h3>
+
+<p>在E盘新建目录website，然后通过Hugo把站点生成到E:/website下，比如我现在新建一个站点second-blog，执行如下命令</p>
+
+<pre><code class="language-Bash">kingfsen@LAPTOP-M85G5JUT MINGW64 /e/website
+$ hugo new site E:/website/second-blog
+Congratulations! Your new Hugo site is created in E:\website\second-blog.
+
+Just a few more steps and you're ready to go:
+
+1. Download a theme into the same-named folder.
+   Choose a theme from https://themes.gohugo.io/, or
+   create your own with the &quot;hugo new theme &lt;THEMENAME&gt;&quot; command.
+2. Perhaps you want to add some content. You can add single files
+   with &quot;hugo new &lt;SECTIONNAME&gt;\&lt;FILENAME&gt;.&lt;FORMAT&gt;&quot;.
+3. Start the built-in live server via &quot;hugo server&quot;.
+
+Visit https://gohugo.io/ for quickstart guide and full documentation.
+</code></pre>
+
+<p>命令执行成功之后查看E:/website/second-blog目录，查看文件目录结构。</p>
+
+<pre><code class="language-Bash">│  config.toml
+│
+├─archetypes
+│      default.md
+│
+├─content
+├─data
+├─layouts
+├─static
+└─themes
+</code></pre>
+
+<ul>
+<li>config.toml<br/>
+站点全局的参数配置文件</li>
+
+<li><p>archetypes<br/>
+Hugo的markdown文件中前置数据Front Matter定义的结构，默认使用的是default.md文件，可以自定义，然后在config.toml中指定自定义的结构文件，打开default.md文件。</p>
+
+<pre><code class="language-Yaml">  ---
+  title: &quot;{{ replace .Name &quot;-&quot; &quot; &quot; | title }}&quot;
+  date: {{ .Date }}
+  draft: true
+  ---
+</code></pre>
+
+<p>这是一种yaml格式，前面的文章说过，Front Matter支持三种格式，除了yaml，还支持toml，json方式。</p>
+
+<p>toml</p>
+
+<pre><code class="language-toml">+++
+title = &quot;{{ replace .Name &quot;-&quot; &quot; &quot; | title }}&quot;
+date = {{ .Date }}
+draft = true
++++
+</code></pre>
+
+<p>json</p>
+
+<pre><code class="language-json">{
+  &quot;title&quot;:&quot;{{ replace .Name &quot;-&quot; &quot; &quot; | title }}&quot;,
+  &quot;date&quot;:{{ .Date }},
+  &quot;draft&quot;:true
+}
+</code></pre>
+
+<p>至于喜欢哪种格式，可以在config.toml中进行配置，默认使用的是yaml格式。通过执行hugo new 命令生成的markdown文件，头部默认会有这段渲染之后的Front Matter，一般我们会把draft属性去掉，draft草稿的意思，有这个属性的md文件不会渲染输出，
+当然通过hugo &ndash;buildDrafts可以强制输出。</p>
+
+<ul>
+<li><p>content<br/>
+存放网页内容的目录，即我们编写的markdown文件都存放在此目录，此目录是Hugo的默认源目录，在E:/website/second-blog下执行命令 <code>hugo new post/hugo_introduce.md</code>之后，
+则会在content目录下生成子目录post，post中有一个hugo_introduce.md文件。</p></li>
+
+<li><p>data<br/>
+data目录用来存放数据文件，一般是json文件，Hugo提供了相关命令可以从data目录下读取相关的文件数据，然后渲染到HTML页面中，将业务数据与模板分离。</p></li>
+
+<li><p>layouts<br/>
+存放自定义的模板文件，Hugo优先使用layouts目录下的模板，未发现再去themes目录下查找。</p></li>
+
+<li><p>static<br/>
+存放静态文件，比如css、js、img等文件目录，Hugo在渲染时，会直接将static目录下的文件直接复制到public目录下，不会做任何渲染。</p></li>
+
+<li><p>themes<br/>
+存放网站主题，可以下载多个主题，themes目录下的每个子目录代表了一个主题，可以通过在config.toml中通过参数theme指定主题，即theme目录下的子目录名字，
+也可以在执行hugo命令渲染时通过增加flag参数&ndash;theme=xx指定。</p></li>
+</ul>
+
+<h3 id="配置主题">配置主题</h3>
+
+<p>一个静态站点的布局外观离不开css样式，在Hugo中通过主题theme来管理样式，在Hugo的<a href="https://themes.gohugo.io/">官方网站</a>即可预览下载社区提供的很多主题，当然我们也可以
+通过github下载对应的主题，<a href="https://github.com/kingfsen/hugoThemes">点击这里</a>可以获取Hugo的全部主题，大部分主题提供了图片预览或者Demo在线预览，自由选择下载即可。</p>
+
+<p>这里我选择排在第一个的主题AllinOne，进入E:\website\second-blog\themes，执行git clone命令下载主题。</p>
+
+<p>```</p></li>
+</ul>
+
+<p>kingfsen@LAPTOP-M85G5JUT MINGW64 /e/website/second-blog/themes
+$ git clone <a href="https://github.com/orianna-zzo/AllinOne.git">https://github.com/orianna-zzo/AllinOne.git</a>
+Cloning into &lsquo;AllinOne&rsquo;&hellip;
+remote: Enumerating objects: 962, done.
+remote: Total 962 (delta 0), reused 0 (delta 0), pack-reused 962
+Receiving objects: 100% (<sup>962</sup>&frasl;<sub>962</sub>), 24.18 MiB | 32.00 KiB/s, done.
+Resolving deltas: 100% (<sup>357</sup>&frasl;<sub>357</sub>), done.</p>
+
+<pre><code>
+命令执行成功之后，在themes目录下则有主题目录AllinOne，这个主题中的Example中图片有点多，比较大。在github上可以查看该主题的基本介绍以及详细的参数设置，主题很多都是个人提供出来，可能参差不齐，自行判断。
+我们也可以制作自己的主题，上传到github上，或者在github上fork一个主题分支，在别人的基础上进行开发定制。
+
+### 站点调试
+
+Hugo提供了liveload方式，在执行hugo命令时通过增加flag参数即可。服务启动之后，可以一边修改内容文件或者html模板，浏览器会马上刷新，实时展示最新结果，在本地调试开发非常方便。
+进入站点根目录second-blog目录，新建一个md文件，就比如我当前这个页面hugo_introduce.md文件，markdown这种轻量型标记语言非常容易学会，花点时间看几遍其语法就能学会。
+
+</code></pre>
+
+<p>$ hugo new post/hugo_introduce.md
+E:\website\second-blog\content\post\hugo_introduce.md created</p>
+
+<pre><code>
+文件创建成功之后，通过其他工具打开hugo_introduce.md文件丰富一下内容，我们可以在本地启动调试，这里我为了方便直接把md文件中的draft属性去掉了。
+
+</code></pre>
+
+<p>hugo server &ndash;watch &ndash;theme=AllinOne</p>
+
+<pre><code>
+命令执行之后，发现报了一堆错误，仔细一看就是在主题下的模板强制要求定义`Site.Params.slidesDirPath`等属性，打开config.toml配置文件增加参数即可，由于我这里没有准备图片，
+暂时就用AllinOne自带的默认配置，后序准备好了图片直接放在站点根目录下的static即可，再替换路径即可。
+
+</code></pre>
+
+<p>baseURL = &ldquo;<a href="http://example.org/&quot;">http://example.org/&quot;</a>
+languageCode = &ldquo;en-us&rdquo;
+title = &ldquo;Hugo入门详细教程&rdquo;</p>
+
+<p>[Params]
+slidesDirPath = &ldquo;themes/AllinOne/static/img/header-slides&rdquo;<br />
+slidesDirPathURL = &ldquo;img/header-slides&rdquo;</p>
+
+<pre><code>
+配置增加之后，记得点击保存，再次启动本地服务，命令执行成功之后，服务默认在localhost的1313端口，至于端口也可以自行在config.toml中配置，
+不知道参数名是什么，直接执行hugo config命令查看。
+
+```Bash
+$ hugo server --watch --theme=AllinOne
+Building sites …
+                   | EN
++------------------+-----+
+  Pages            |   7
+  Paginator pages  |   0
+  Non-page files   |   0
+  Static files     | 108
+  Processed images |   0
+  Aliases          |   0
+  Sitemaps         |   1
+  Cleaned          |   0
+
+Total in 53 ms
+Watching for changes in E:\website\second-blog\{content,data,layouts,static,themes}
+Watching for config changes in E:\website\second-blog\config.toml
+Environment: &quot;development&quot;
+Serving pages from memory
+Running in Fast Render Mode. For full rebuilds on change: hugo server --disableFastRender
+Web Server is available at http://localhost:1313/ (bind address 127.0.0.1)
+Press Ctrl+C to stop
+</code></pre>
+
+<p>服务启动之后，用浏览器访问 <code>http://localhost:1313</code> ，此时没有文章内容，丰富一下hugo_introduce.md文件，推荐使用Notepad2编写markdown文件，非常简洁，
+当然你喜欢通过第三方专业的markdown编辑软件也可以，不过个人感觉真没那个必要。</p>
+
+<pre><code class="language-Markdown">---
+title: &quot;Hugo构建静态站点入门&quot;
+date: 2019-03-31T12:54:26+08:00
+description: &quot;介绍Hugo生成静态网站的基础知识，让你快速入门，轻松部署属于自己的静态站点&quot;
+thumbnail: &quot;img/hugo.png&quot;
+Tags: 
+- hugo
+Categories:
+- hugo
+---
+
+首先访问Github下载Hugo的应用程序，Hugo各版本release文件下载地址 https://github.com/gohugoio/hugo/releases ， windows请选择下载hugo_0.xx.0_Windows-64bit.zip。
+下载完成止之后解压文件至D:\soft\hugo_0.54，然后把该路径添加到系统环境变量Path中，执行 hugo version 命令验证是否安装成功。
+</code></pre>
+
+<p>查看页面，HTML已经实时渲染了，一边编写文章，一边查看页面效果是否与预期一致，非常方便，速度很快。</p>
+
+<p><img src="/blog/hugo_base/001.png" alt="theme" /></p>
+
+<h3 id="站点部署">站点部署</h3>
+
+<p>通过直接执行hugo server命令在站点目录下不会生成输出目录public，这个目录是默认的输出目录，当然可以通过命令或者config.toml进行配置。</p>
+
+<pre><code class="language-Bash">$ hugo --theme=AllinOne
+Building sites …
+                   | EN
++------------------+-----+
+  Pages            |  14
+  Paginator pages  |   0
+  Non-page files   |   0
+  Static files     | 108
+  Processed images |   0
+  Aliases          |   1
+  Sitemaps         |   1
+  Cleaned          |   0
+
+Total in 129 ms
+ 
+</code></pre>
+
+<p>站点调试没问题之后，则可以部署到服务器上了。通过执行hugo命令会将渲染后的站点文件全部输出到站点目录下的public目录中，
+然后可以把public目录中的东西直接提交到github上，或者以Github Pages方式发布，或者部署到自己服务器上，由于站点文件均是静态文件，
+只需一个Nginx即可将站点运行起来，项目每次有更新，只需先执行 git pull，然后通过命令nginx -s reload重新加载即可。</p>
+
+<p>本篇文章讲解了Hugo的基本入门操作，后面会讲解Hugo的运行机制以及详细的其他站点配置，请通过点击Tag中的hugo或者Category中的hugo阅读Hugo相关博文。</p>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/hugo/" rel="tag">hugo</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+	
+	<li><a href="/post/hugo_blog/">高效的静态网站生成器Hugo</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/go_base/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">深入理解Go语言的基础概念</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/postgresql/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">PostgreSQL命令行操作</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

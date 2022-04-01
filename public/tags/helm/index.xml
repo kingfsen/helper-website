@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>helm on </title>
+    <link>/tags/helm/</link>
+    <description>Recent content in helm on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 02 Jun 2019 13:05:32 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/helm/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Helm架构与中心化部署解决方案</title>
+      <link>/post/helm_design/</link>
+      <pubDate>Sun, 02 Jun 2019 13:05:32 +0800</pubDate>
+      
+      <guid>/post/helm_design/</guid>
+      <description>随着Google容器调度平台Kubernetes的开源，很多社区与项目逐渐涌现，Helm就是其中之一。Helm可以理解成是Kubernetes的包管理工具， 类似rpm与CentOS、dpkg与Debian的关系。在Helm中，安装包被称为Chart，Helm定义了包的文件结构以及语法规范，</description>
+    </item>
+    
+    <item>
+      <title>Helm Harbor</title>
+      <link>/post/helm_harbor/</link>
+      <pubDate>Tue, 19 Mar 2019 10:02:41 +0800</pubDate>
+      
+      <guid>/post/helm_harbor/</guid>
+      <description>chartmuseum chartmuseum是helm chart的仓库，它的存储层支持FileSystem以及各大云厂商的对象存储中间件， 默认支持阿里云的OSS、百度的BOS、Amazon S3、Microsoft Azure、Oracle、Openstack、Google等， 其他厂商需自行实现Storage的B</description>
+    </item>
+    
+    <item>
+      <title>Helm插件安装原理详解</title>
+      <link>/post/helm_plugin_install/</link>
+      <pubDate>Fri, 15 Mar 2019 16:40:22 +0800</pubDate>
+      
+      <guid>/post/helm_plugin_install/</guid>
+      <description>Helm是Kubernetes集群的安装包管理工具，它与Kubernetes的关系类似于RPM与Centos。Helm提供了安装插件方式去扩展其核心功能，插件主要在客户端执行，并且存放在$HELM_HOME的plugins目录中。 Helm的插件安装源可以支持多种形式，Helm插件是以plu</description>
+    </item>
+    
+  </channel>
+</rss>

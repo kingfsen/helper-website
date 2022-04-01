@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Wordpress on </title>
+    <link>/tags/wordpress/</link>
+    <description>Recent content in Wordpress on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 13 Mar 2019 10:28:01 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/wordpress/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>基于Docker快速搭建wordpress博客</title>
+      <link>/post/docker_deploy_wordpress/</link>
+      <pubDate>Wed, 13 Mar 2019 10:28:01 +0800</pubDate>
+      
+      <guid>/post/docker_deploy_wordpress/</guid>
+      <description>wordpress数据存储依赖mysql数据库，以docker容器方式部署完整的wordpress博客服务，则需要从镜像仓库拉取mysql、wordpress镜像，这里选择从开源的docker hub 获取mysql 5.7版本，wordpress latest版本，同时需要准备一台具备外网环境的机器</description>
+    </item>
+    
+  </channel>
+</rss>

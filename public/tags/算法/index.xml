@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>算法 on </title>
+    <link>/tags/%E7%AE%97%E6%B3%95/</link>
+    <description>Recent content in 算法 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 16 Mar 2019 19:00:11 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E7%AE%97%E6%B3%95/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>字典树的应用与实现</title>
+      <link>/post/trie/</link>
+      <pubDate>Sat, 16 Mar 2019 19:00:11 +0800</pubDate>
+      
+      <guid>/post/trie/</guid>
+      <description>字典树又称为单词查找树或者前缀树，是一种用于快速检索的树形结构，比如小写字母词典数是一个26叉数，数字的字典树是一个10叉数。字典数的键并未保存在节点中，而是由节点在树中的位置决定的。 根节点一般对应空信息。字典树的优点是查询效率高，其核心思想是利用空间换时间，利用字符串的公共前缀来提高效率</description>
+    </item>
+    
+    <item>
+      <title>字符串的最小包含子串</title>
+      <link>/post/get_min_contains_sub_string/</link>
+      <pubDate>Sat, 16 Mar 2019 13:19:14 +0800</pubDate>
+      
+      <guid>/post/get_min_contains_sub_string/</guid>
+      <description>问题 给定字符串str1，str2，获取字符串str1中包含str2的最小字符子串。 str1=&amp;ldquo;abcde&amp;rdquo;, str2=&amp;ldquo;bd&amp;rdquo; -&amp;gt; bcd str1=&amp;ldquo;abcde&amp;rdquo;, str2=&amp;ldquo;cg&amp;rdquo; -&amp;gt; &amp;ldquo;&amp;rdquo; 思路 假定字符编码范围0~255 创建一个size为256的整形数组charCount，用来保存字符串str2所有字符的出现次数 整形变量match用来表示当前差几个字符未匹配 将str1、str2分</description>
+    </item>
+    
+    <item>
+      <title>判断两个单词是否为变形词</title>
+      <link>/post/check_deformation_word/</link>
+      <pubDate>Sat, 16 Mar 2019 11:29:21 +0800</pubDate>
+      
+      <guid>/post/check_deformation_word/</guid>
+      <description>问题 给定两个单词word1，word2，判断两个单词是否是变形词，即两个单词中的每个字符出现的次数一致。 word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;acbc&amp;rdquo;, 返回true word1=&amp;ldquo;abcc&amp;rdquo;, word=&amp;ldquo;abbc&amp;rdquo;, 返回false word1=&amp;ldquo;abc&amp;rdquo;, word=&amp;ldquo;cba&amp;rdquo;, 返回true 思路 假定字符串的编码范围0~255。 新建一个size为256的int数组 分别将单词word1、word2转换为对应的字符数组word1C</description>
+    </item>
+    
+    <item>
+      <title>从数组中获取指定数量的随机元素</title>
+      <link>/post/get_random_number_from_array/</link>
+      <pubDate>Wed, 13 Mar 2019 20:41:18 +0800</pubDate>
+      
+      <guid>/post/get_random_number_from_array/</guid>
+      <description>问题 从给定的一个整型数组中，随机获取指定数量的数组元素。 思路一 新建一个与整型数组相同长度的boolean类型数组用来做标志位，标志位值为true表示当前元素是否已经获取，如果数组元素未被获取，则取出该元素，同时把对应的标志位置位true，如果发现当前元素已经获取，则重新随机获取。 public static int[] get(int[] array,</description>
+    </item>
+    
+  </channel>
+</rss>

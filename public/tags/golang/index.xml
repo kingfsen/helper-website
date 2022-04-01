@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>golang on </title>
+    <link>/tags/golang/</link>
+    <description>Recent content in golang on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 30 Mar 2019 13:48:07 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/golang/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>深入理解Go语言的基础概念</title>
+      <link>/post/go_base/</link>
+      <pubDate>Sat, 30 Mar 2019 13:48:07 +0800</pubDate>
+      
+      <guid>/post/go_base/</guid>
+      <description>这篇文章主要讲解一些go语言开发的入门知识，希望对准备入门学习Go语言的开发者有点帮助。我之前也一直用Java语言进行开发，后来迫于公司的相关容器项目， 就自学Go语言，一边学习一边完成工作。Go语言是Google开源的编程语言，众多开源项目kubernetes、docker、prometh</description>
+    </item>
+    
+  </channel>
+</rss>

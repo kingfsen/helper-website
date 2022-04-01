@@ -1,0 +1,210 @@
+LanguageCode = "zh-cn"
+hasCJKLanguage = true
+theme = "Mainroad"
+summaryLength = "145"
+defaultContentLanguage = "zh-cn"
+Paginate = 10
+enableInlineShortcodes = true
+Title=""
+    
+[Params]
+  description = "专注于Java、Go、Kubernetes、Docker、Harbor、Helm等容器相关技术方向开发"
+  subtitle = ""
+  toc = true
+  keywords = "youendless,君无止境,Hugo,Java,Go,Kubernetes,Docker,Harbor,Helm,容器技术,博客,静态博客"
+  readmore = true
+  dateformat = "2006-01-02"
+  post_navigation = true
+  post_related = true
+  share_open = true
+  baidu_push = true
+  baidu_count_id = "1f3ac79473dea8a6643d0e73a08fa809"
+  authorbox = false
+  isso_open = true
+  friend_link_open = true
+  share_top_show = true
+  to_top_show = true
+  
+[Author] # Used in authorbox
+  name = "作者kingfsen"
+  bio = "一个不会写Bug的后端开发工程师，擅长Java、Go等编程语言。"
+  avatar = "img/avatar.png"
+  
+[Params.isso]
+  prefix = "isso"
+
+[Params.sidebar]
+  home = "right"
+  list = "right"
+  single = "right"
+  widgets = ["search", "languages", "recent", "categories", "taglist", "social"]
+
+[Params.widgets]
+  recent_num = 10
+  tags_counter = true
+
+[menu]
+[[menu.main]]
+  identifier = "post"
+	name = "博客"
+	title = "技术博客文章"
+	url = "/post/"
+
+[[menu.main]]
+  identifier = "about"
+	name = "名站导航"
+	title = "各技术名站汇总"
+	url = "/about/"
+	
+[[menu.main]]
+  identifier = "timeline"
+	name = "时间轴"
+	title = "博客创作时间轨迹"
+	url = "/timeline/"
+	
+[Params.widgets.social]
+  github = "kingfsen"
+  email = "562620163@qq.com"
+  
+[related]
+   threshold = 80
+   includeNewer = true
+   toLower = true
+   [[related.indices]]
+     name = "tags"
+	 weight = 100
+	 
+[[Params.popularLink]]
+  descText = "友情链接"
+  [[Params.popularLink.details]]
+      href = "http://www.sunhaojie.com/"
+      name = "孙豪杰的博客"
+      domain = "sunhaojie.com"
+      logo = "/img/sunhaojie.png"
+[[Params.popularLink]]
+  descText = "Docker容器技术"
+  [[Params.popularLink.details]]
+      href = "https://kubernetes.io/"
+      name = "kubernetes"
+      domain = "kubernetes.io"
+      logo = "https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/kubernetes/kubernetes.png"
+  [[Params.popularLink.details]]
+      href = "https://docs.docker.com/"
+      name = "docker"
+      domain = "docs.docker.com"
+      logo = "https://raw.githubusercontent.com/github/explore/80688e429a7d4ef2fca1e82350fe8e3517d3494d/topics/docker/docker.png"
+  [[Params.popularLink.details]]
+      href = "https://prometheus.io/"
+      name = "prometheus"
+      domain = "prometheus.io"
+      logo = "/img/prometheus.png"
+  [[Params.popularLink.details]]
+      href = "https://grafana.com/docs/"
+      name = "grafana"
+      domain = "grafana.com"
+      logo = "/img/grafana.png"
+  [[Params.popularLink.details]]
+      href = "https://helm.sh/docs/"
+      name = "helm"
+      domain = "helm.sh"
+      logo = "/img/helm.png"
+  [[Params.popularLink.details]]
+      href = "https://goharbor.io/docs/"
+      name = "harbor"
+      domain = "goharbor.io"
+      logo = "/img/harbor.png"
+  [[Params.popularLink.details]]
+      href = "https://chartmuseum.com/docs/"
+      name = "chartmusuem"
+      domain = "chartmuseum.com"
+      logo = "/img/chartmuseum.png"
+  [[Params.popularLink.details]]
+      href = "https://grpc.io/docs/"
+      name = "grpc"
+      domain = "grpc.io"
+      logo = "/img/grpc.png"
+  [[Params.popularLink.details]]
+      href = "https://github.com/kubeapps"
+      name = "kubeapps"
+      domain = "github.com/kubeapps"
+      logo = "https://avatars2.githubusercontent.com/u/32396354?s=200&v=4"
+  [[Params.popularLink.details]]
+      href = "http://coreos.com"
+      name = "coreos"
+      domain = "coreos.com"
+      logo = "https://avatars0.githubusercontent.com/u/3730757?s=200&v=4"
+  [[Params.popularLink.details]]
+      href = "https://appscode.com/products/swift"
+      name = "appscode/swift"
+      domain = "appscode.com"
+      logo = ""
+  [[Params.popularLink.details]]
+      href = "https://www.openshift.com/"
+      name = "openshift"
+      domain = "openshift.com"
+      logo = "https://avatars0.githubusercontent.com/u/792337?s=200&v=4"
+[[Params.popularLink]]
+  descText = "Git代码托管平台"
+  [[Params.popularLink.details]]
+      href = "https://github.com/"
+      name = "github"
+      domain = "github.com"
+      logo = "/img/github.png"
+  [[Params.popularLink.details]]
+      href = "https://about.gitlab.com/"
+      name = "gitlab"
+      domain = "gitlab.com"
+      logo = "/img/gitlab.png"
+  [[Params.popularLink.details]]
+      href = "https://gitee.com/"
+      name = "码云"
+      domain = "gitee.com"
+      logo = "/img/gitee.png"
+[[Params.popularLink]]
+  descText = "IT技术论坛"
+  [[Params.popularLink.details]]
+      href = "https://stackoverflow.com/"
+      name = "stackoverflow"
+      domain = "stackoverflow.com"
+      logo = "/img/stackoverflow.png"
+  [[Params.popularLink.details]]
+      href = "https://www.cnblogs.com/"
+      name = "博客园"
+      domain = "cnblogs.com"
+      logo = "/img/cnblogs.png"
+  [[Params.popularLink.details]]
+      href = "https://www.oschina.net/blog"
+      name = "开源中国"
+      domain = "oschina.net"
+      logo = "/img/oschina.png"
+  [[Params.popularLink.details]]
+      href = "https://www.csdn.net/"
+      name = "CSDN博客"
+      domain = "csdn.net"
+      logo = "/img/csdn.png"
+  [[Params.popularLink.details]]
+      href = "https://www.jianshu.com/"
+      name = "简书"
+      domain = "jianshu.com"
+      logo = "/img/jianshu.png"
+  [[Params.popularLink.details]]
+      href = "https://segmentfault.com/"
+      name = "segmentFault"
+      domain = "segmentfault.com"
+      logo = "/img/segmentfault.png"
+  [[Params.popularLink.details]]
+      href = "https://www.infoq.cn/"
+      name = "infoq"
+      domain = "infoq.cn"
+      logo = "/img/infoq.png"
+  [[Params.popularLink.details]]
+      href = "https://blog.51cto.com/"
+      name = "51CTO"
+      domain = "51cto.com"
+      logo = "/img/51cto.png"
+  [[Params.popularLink.details]]
+      href = "https://www.iteye.com/"
+      name = "IT之眼"
+      domain = "iteye.com"
+      logo = "/img/iteye.png"
+      

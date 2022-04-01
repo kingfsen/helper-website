@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>Docker镜像扫描之CVE漏洞数据源 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="详细介绍如何从各开源社区获取详细的CVE数据，然后搭建自己的CVE数据库">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">Docker镜像扫描之CVE漏洞数据源</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-04-30T16:32:25">2019-04-30</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/docker" rel="category">Docker</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">6 分钟</time>
+</div></div>
+		</header>
+
+  
+<div class="content post__content clearfix">
+			<p><a href="https://cve.mitre.org/cve/search_cve_list.html">CVE</a>，全称Common Vulnerabilities and Exposures，指的是公共已知的网络漏洞缺陷，每个漏洞都会分配一个唯一的标志CVE ID(如CVE-2008-7220)，
+漏洞的相关信息由CNA维护，各系统厂商暴露出的漏洞通过CVE-ID均可在<a href="https://cve.mitre.org/cve/search_cve_list.html">CVE</a> 社区跟踪查询。</p>
+
+<p>既然要搭建自己的CVE数据库，我们需要知道的是在某个Linux系统版本，某个软件包产生了哪些漏洞，又在什么版本修复了哪些漏洞，
+这些详细数据需要到各系统厂商维护的社区去获取，目前主要有5个开放社区，分别是alpine、debian、oracle、rhel以及ubuntu，各社区通过其官网
+或者github持续维护软件包在其系统版本上的产生的各种漏洞数据，不过它们各自提供的数据格式差异很大，我们获取的时候需要进行适配。</p>
+
+<p>随着Google的容器调度平台Kubernetes开源问世，<a href="https://coreos.com/">CoreOS</a>也开始备受关注，开源分布式KV数据存储系统etcd，网络组件项目flannel等都是其产物。
+我们现在要说的是另外一个项目<a href="https://github.com/coreos/clair">Clair</a> ，该项目用于支撑Docker镜像扫描功能，它定时从各社区同步CVE数据，然后解析汇总保存在自己的
+PostgreSQL数据库中，当接收到镜像扫描请求时，直接将镜像中的软件版本数据与数据库比对一番，即可输出当前镜像软件包已存在的各级别漏洞。</p>
+
+<p>在Clair中，漏洞等级有以下几种:</p>
+
+<ul>
+<li><code>Unknown</code> 社区暂未给出优先级或者Clair当前未同步支持</li>
+<li><code>Negligible</code> 几乎无任何影响的漏洞，不会单独给出一个针对性的修复更新版本</li>
+<li><code>Low</code> 低风险等级，一般会在更高风险等级漏洞修复版本中修复</li>
+<li><code>Medium</code> 中风险等级，如跨域、用户权限暴露等，会有针对性版本修复</li>
+<li><code>High</code> 高风险等级，漏洞在大多数人默认的安装版本中出现，如服务出错、数据丢失、root权限恶意获取等</li>
+<li><code>Critical</code> 最高风险等级，几乎所有版本都存在某漏洞，如造成用户大量数据丢失</li>
+</ul>
+
+<p>Clair通过参数控制同步漏洞数据周期，设置为0则表示不同步，默认12h。</p>
+
+<pre><code class="language-yaml">clair:
+  updater:
+    interval: 12h
+</code></pre>
+
+<p>Clair使用数据库表记录了上一次在各开源社区同步CVE数据的状态点，比如key为alpine-secdbUpdater的数据记录的是上一次同步alpine漏洞状态，
+value为9d09b2a1e6e04e419e2488d2914bd6f383f62b76指的是git commit，其中的updater/last记录的是系统上一次CVE全部同步完成时间，Clair
+结合系统参数interval来控制同步CVE漏洞数据的执行时间。</p>
+
+<p><img src="/blog/cve/001.png" alt="keyvalue" /></p>
+
+<p>从各开源社区获取CVE数据之后，Clair会进行数据解析，将各社区CVE数据统一结构，每一个漏洞都是一个database.Vulnerability对象。</p>
+
+<pre><code class="language-go">v := &amp;database.Vulnerability{
+  Severity: database.UnknownSeverity,
+  Name: &quot;CVE-2018-19044&quot;,
+  Link: &quot;https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2018-19044&quot;,
+  FixedIn: []database.FeatureVersion{
+    {
+      Feature: database.Feature{
+        Namespace: database.Namespace{
+          Name:          &quot;alpine:v3.9&quot;
+          VersionFormat: &quot;pkg&quot;,
+        },
+        Name: &quot;keepalived&quot;,
+      },
+      Version: &quot;2.0.11-r0&quot;,
+    },
+  },
+}
+</code></pre>
+
+<p>Severity为漏洞风险等级，Vuluerability.Name为CVE-ID，Link为CVE详情链接，Namespace.Name为操作系统，VersionFormat软件管理包，
+如centos为rpm，alpine为pkg，Feature.Name为软件包名字，Version为软件包版本。</p>
+
+<p>下面详细介绍Clair同步各社区CVE数据的策略</p>
+
+<ul>
+<li><p>alpine</p>
+
+<p>alpine维护的CVE数据源项目在github上，项目地址：<a href="https://github.com/alpinelinux/alpine-secdb">https://github.com/alpinelinux/alpine-secdb</a> 。</p>
+
+<p><img src="/blog/cve/002.png" alt="keyvalue" /></p>
+
+<p>Clair首先通过查看当前目录是否存在alpine-secdb目录，存在则执行git pull命令拉取更新，否则执行git clone命令克隆该项目到本地。
+项目更新完成之后，开始判断是否需要进行数据解析，执行命令<code>git rev-parse HEAD</code>获取最新的commit，将该commit与数据库中记录的上一次
+commit对比，如果一致表示当前项目并无新的数据提交，无需同步，否则开始下面的数据解析流程。</p>
+
+<ol>
+<li>解析namespace，Clair中namespace的概念就是操作系统版本的意思，如alphine:v3.3，centos:6.0。</li>
+<li>解析CVE详细数据，v3.3 ~ v3.9指的是alpine的版本号，每个文件夹下有两个yaml文件，分别是main.yaml、community.yaml，两个文件中的数据格式是一致的，
+main.yaml指的是alpine自身相关组件产生的漏洞，而community则是社区一些安装包产生的漏洞，截取其中一段进行解释。
+<br /></li>
+</ol>
+
+<pre><code class="language-yaml">distroversion: v3.9
+reponame: community
+urlprefix: http://dl-cdn.alpinelinux.org/alpine
+apkurl: &quot;{{urlprefix}}/{{distroversion}}/{{reponame}}/{{arch}}/{{pkg.name}}-{{pkg.ver}}.apk&quot;
+packages:
+- pkg:
+  name: keepalived
+  secfixes:
+    2.0.11-r0:
+      - CVE-2018-19044
+      - CVE-2018-19045
+      - CVE-2018-19046
+- pkg:
+  name: libraw
+  secfixes:
+    0.19.2-r0:
+      - CVE-2018-20363
+      - CVE-2018-20364
+      - CVE-2018-20365
+    0.18.6-r0:
+      - CVE-2017-16910
+</code></pre>
+
+<p>从文件中看出，在alphine:3.9操作系统上版本为<code>2.0.11-r0</code>的<code>keepalived</code>修复了CVE-2018-19044、CVE-2018-19045、CVE-2018-19046漏洞，然后将每一个CVE漏洞封装成一个
+Vulnerability。</p>
+
+<ul>
+<li>debian</li>
+</ul>
+
+<p>debian提供了一个http接口用于获取其CVE漏洞数据，接口直接返回application/json数据，
+URL: <a href="https://security-tracker.debian.org/tracker/data/json">https://security-tracker.debian.org/tracker/data/json</a> 。Clair利用sha1对http请求返回的body数据计算一个摘要，
+计算出的摘要和数据库中上一次的摘要一致，则不更新，否则解析json数据，接口返回数据样例如下。</p>
+
+<p><img src="/blog/cve/003.png" alt="keyvalue" /></p>
+
+<p>debian各代码名字与数字版本的转换关系如下。</p>
+
+<pre><code class="language-bash">squeeze: 6
+wheezy:  7
+jessie:  8
+stretch: 9
+buster:  10
+sid:     unstable
+</code></pre></li>
+
+<li><p>rhel</p>
+
+<p>rhel数据源URL：<a href="https://www.redhat.com/security/data/oval/">https://www.redhat.com/security/data/oval/</a> 。
+Clair首先http请求URL，获取结果之后，逐行解析文本，筛选出符合匹配表达式<code>com.redhat.rhsa-(\d+).xml</code>的行，将匹配出的
+批次号与数据库中批次号比对，比数据库中批次号大则添加到待处理文件列表。首次解析rhel的CVE数据非常耗时，因为要解析处理所有
+的批次文件，之后则是增量更新，只处理新增的批次文件。</p>
+
+<p><img src="/blog/cve/004.png" alt="keyvalue" /></p>
+
+<p>待处理文件列表不为空，则开始解析文件列表中文件数据，通过http请求获取xml文件内容。</p></li>
+
+<li><p>oracle</p>
+
+<p>oracle数据源URL: <a href="https://linux.oracle.com/oval/">https://linux.oracle.com/oval/</a> 。
+oracle的CVE数据处理方式与rhel非常相似，不做过多详细介绍。</p></li>
+
+<li><p>ubuntu</p>
+
+<p>CVE数据维护项目git URL: <a href="https://git.launchpad.net/ubuntu-cve-tracker">https://git.launchpad.net/ubuntu-cve-tracker</a> 。</p></li>
+</ul>
+
+<p>Clair最后会将各社区的CVE数据再汇总组合，存入PostgreSQL中。</p>
+
+<p>拥有各开源社区CVE数据源之后，则可以搭建自己的CVE数据库，继而搭建个人软件扫描服务。</p>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/clair/" rel="tag">clair</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/harbor_image_scan/">Harbor仓库镜像扫描原理</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/docker_storage_driver/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">Docker镜像存储结构与原理</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/docker_image_scan/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">Docker镜像扫描原理</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

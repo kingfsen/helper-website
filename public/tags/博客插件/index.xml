@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>博客插件 on </title>
+    <link>/tags/%E5%8D%9A%E5%AE%A2%E6%8F%92%E4%BB%B6/</link>
+    <description>Recent content in 博客插件 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Wed, 27 Mar 2019 16:18:10 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E5%8D%9A%E5%AE%A2%E6%8F%92%E4%BB%B6/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>开源评论系统isso</title>
+      <link>/post/isso/</link>
+      <pubDate>Wed, 27 Mar 2019 16:18:10 +0800</pubDate>
+      
+      <guid>/post/isso/</guid>
+      <description>评论功能是静态博客系统的一个特色，是阅读者交流学习的一种手段。当前国内外都开源出很多评论系统， 包括企业或者个人贡献的，但是很多评论系统临时开放出来，过一段时间则关闭停止服务，所以给自己的博客选择一款稳定 的评论系统非常重要。 对于静态博客来说，由于它缺失后台服务，所以用户的评论数据都是落地在第</description>
+    </item>
+    
+  </channel>
+</rss>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>overlay on </title>
+    <link>/tags/overlay/</link>
+    <description>Recent content in overlay on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Thu, 25 Apr 2019 14:21:03 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/overlay/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Docker镜像存储结构与原理</title>
+      <link>/post/docker_storage_driver/</link>
+      <pubDate>Thu, 25 Apr 2019 14:21:03 +0800</pubDate>
+      
+      <guid>/post/docker_storage_driver/</guid>
+      <description>Docker容器镜像存在哪儿，怎么存放? Docker容器在运行的过程中，只有小部分的数据可能需要写到容器可写层，因为大部分场景下，我们可以通过Docker volumes来写数据， 但是某些场景下，就是需要往容器可写层写数据，这就是Docker存储驱动Storage Driver出现的原因，这些</description>
+    </item>
+    
+  </channel>
+</rss>

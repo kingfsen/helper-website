@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>字典树 on </title>
+    <link>/tags/%E5%AD%97%E5%85%B8%E6%A0%91/</link>
+    <description>Recent content in 字典树 on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sat, 16 Mar 2019 19:00:11 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/%E5%AD%97%E5%85%B8%E6%A0%91/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>字典树的应用与实现</title>
+      <link>/post/trie/</link>
+      <pubDate>Sat, 16 Mar 2019 19:00:11 +0800</pubDate>
+      
+      <guid>/post/trie/</guid>
+      <description>字典树又称为单词查找树或者前缀树，是一种用于快速检索的树形结构，比如小写字母词典数是一个26叉数，数字的字典树是一个10叉数。字典数的键并未保存在节点中，而是由节点在树中的位置决定的。 根节点一般对应空信息。字典树的优点是查询效率高，其核心思想是利用空间换时间，利用字符串的公共前缀来提高效率</description>
+    </item>
+    
+  </channel>
+</rss>

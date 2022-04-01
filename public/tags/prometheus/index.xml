@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>prometheus on </title>
+    <link>/tags/prometheus/</link>
+    <description>Recent content in prometheus on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 15 Mar 2019 09:48:52 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/prometheus/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Prometheus监控Kubernetes服务(二)</title>
+      <link>/post/prometheus_monitor_k8s2/</link>
+      <pubDate>Fri, 15 Mar 2019 09:48:52 +0800</pubDate>
+      
+      <guid>/post/prometheus_monitor_k8s2/</guid>
+      <description>prometheus相关的服务已经在kubernetes中部署完成，请参阅文章 Prometheus监控Kubernetes服务(一) 。 Prometheus Label Label在prometheus服务抓取中非常重要，通过标签重写或者标签过滤抓取目标等是非常强大的功能。除了目标本身自定义的标签，prometheus还</description>
+    </item>
+    
+    <item>
+      <title>Prometheus监控Kubernetes服务(一)</title>
+      <link>/post/prometheus_monitor_k8s/</link>
+      <pubDate>Wed, 13 Mar 2019 10:29:13 +0800</pubDate>
+      
+      <guid>/post/prometheus_monitor_k8s/</guid>
+      <description>Prometheus功能结构 Prometheus是基于golang编写的一个开源监控项目，当前应用非常广泛，尤其是与当前的容器调度平台kubernetes融合，使用Prometheus之前，我们应该了解下它的使用场景，它不能用来进行大量无规则数据的收集，不能替代日志收集工具，同时由于Pro</description>
+    </item>
+    
+  </channel>
+</rss>

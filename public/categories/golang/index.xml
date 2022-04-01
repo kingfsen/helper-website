@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>golang on </title>
+    <link>/categories/golang/</link>
+    <description>Recent content in golang on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Fri, 31 May 2019 16:51:12 +0800</lastBuildDate>
+    
+	<atom:link href="/categories/golang/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>使用Golang部署gRPC服务</title>
+      <link>/post/grpc/</link>
+      <pubDate>Fri, 31 May 2019 16:51:12 +0800</pubDate>
+      
+      <guid>/post/grpc/</guid>
+      <description>gRPC与大多数RPC框架一样，通过定义一个服务Service，然后明确指定能够被远程调用的方法。gRPC默认使用Protocol Buffers作为接口定义语言以及消息传输格式， 当然也可以使用其它可替代的协议，关于Protocol Buffers的介绍请参考gRPC协议Protocol Buf</description>
+    </item>
+    
+    <item>
+      <title>gRPC协议Protocol Buffers</title>
+      <link>/post/protocol_buffers/</link>
+      <pubDate>Thu, 30 May 2019 16:39:50 +0800</pubDate>
+      
+      <guid>/post/protocol_buffers/</guid>
+      <description>Protocol Buffers是一种灵活、高效、自动序列化结构数据的协议，当前有两个版本，分别是proto2与proto3，两个版本的协议不能完全兼容。 proto3简化了协议使用，生成的协议使用代码支持更多的编程语言，如Java、C++、Python、Java、Lite、Ruby、JavaScript、</description>
+    </item>
+    
+    <item>
+      <title>深入理解Go语言的基础概念</title>
+      <link>/post/go_base/</link>
+      <pubDate>Sat, 30 Mar 2019 13:48:07 +0800</pubDate>
+      
+      <guid>/post/go_base/</guid>
+      <description>这篇文章主要讲解一些go语言开发的入门知识，希望对准备入门学习Go语言的开发者有点帮助。我之前也一直用Java语言进行开发，后来迫于公司的相关容器项目， 就自学Go语言，一边学习一边完成工作。Go语言是Google开源的编程语言，众多开源项目kubernetes、docker、prometh</description>
+    </item>
+    
+    <item>
+      <title>基于数据库的简单Leader Elect</title>
+      <link>/post/leader_elect_golang/</link>
+      <pubDate>Mon, 11 Mar 2019 15:14:25 +0800</pubDate>
+      
+      <guid>/post/leader_elect_golang/</guid>
+      <description>某个系统只用来执行定时任务，如果只部署单台服务，那么又容易单点故障，如果部署多台服务，又如何只保证每次只会其中一台去执行呢，在这里，可以对N台服务，做一个简单的leader elect，成为leader的实例才可以去执行定时任务。虽然当前出现很多开源的leader选举组件，比如zookeep</description>
+    </item>
+    
+  </channel>
+</rss>

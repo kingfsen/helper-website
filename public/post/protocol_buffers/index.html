@@ -1,0 +1,704 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>gRPC协议Protocol Buffers - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="介绍gRPC协议语法以及编码规则，以及其优势">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">gRPC协议Protocol Buffers</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-05-30T16:39:50">2019-05-30</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/golang" rel="category">golang</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">8 分钟</time>
+</div></div>
+		</header>
+
+  
+    <div class="toc">
+        <div class="toc__title"><span id="toc_menu_tip">展开书签</span></div>
+        <div class="toc__menu">
+          <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#规范">规范</a></li>
+<li><a href="#语法">语法</a>
+<ul>
+<li>
+<ul>
+<li><a href="#定义消息类型">定义消息类型</a></li>
+<li><a href="#字段类型">字段类型</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#消息编码">消息编码</a>
+<ul>
+<li>
+<ul>
+<li><a href="#消息结构">消息结构</a></li>
+</ul></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>  
+    </div>
+    <script type="text/javascript">
+    $(".toc__title").click( function () {
+      if($(".toc__menu").css('display') == 'none') {
+        $(".toc__menu").show(); 
+        $("#toc_menu_tip").html("收起书签");
+      } else {
+        $(".toc__menu").hide(); 
+        $("#toc_menu_tip").html("展开书签");
+      }
+    });
+    </script>
+  
+<div class="content post__content clearfix">
+			
+
+<p>Protocol Buffers是一种灵活、高效、自动序列化结构数据的协议，当前有两个版本，分别是proto2与proto3，两个版本的协议不能完全兼容。
+proto3简化了协议使用，生成的协议使用代码支持更多的编程语言，如Java、C++、Python、Java、Lite、Ruby、JavaScript、Objective-C、C#，推荐使用proto3。</p>
+
+<p>当前已经有应用非常广泛的XML、JSON数据格式，为何Google还会推出Protocol Buffers，并且在Google应用中大量使用，从Protocol Buffers编码可知，与XML、JSON
+想必，它具有很多优势。</p>
+
+<ul>
+<li>结构简单</li>
+<li>传输的数据更小</li>
+<li>处理速度更快</li>
+<li>生成数据操作方法，在编程中非常容易使用</li>
+</ul>
+
+<h2 id="规范">规范</h2>
+
+<p>如果使用Protocol Buffers协议，首先需要编写.proto文本文件，通过.proto文件定义消息类型，然后通过编译工具将.proto文件生成不同编程语言的协议使用代码。
+.proto文件有一些格式规范建议，其内容也可以当成一种描述语言，在编写时尽量遵循这些规范，这样更容易阅读，编译工具生成的协议编程代码更规范。</p>
+
+<ul>
+<li>文件中每行的长度保持在80个字符以内</li>
+<li>文件名命名成lower_snake_case.proto格式</li>
+<li>文件中使用2个空格缩进</li>
+
+<li><p>消息名称使用驼峰拼写(首字母大写)，消息中字段使用小写下划线分隔</p>
+
+<pre><code class="language-go">message SongServerRequest {
+  string song_name = 1;
+}
+</code></pre>
+
+<ul>
+<li>RPC Service名以及方法名使用驼峰拼写(首字母大写)</li>
+</ul>
+
+<pre><code class="language-go">service FooService {
+  rpc GetSomething(FooRequest) returns (FooResponse);
+}
+</code></pre></li>
+
+<li><p>列表字段带上负数形式</p>
+
+<pre><code class="language-go">repeated string keys = 1;
+repeated MyMessage accounts = 17;
+</code></pre>
+
+<ul>
+<li>Enums枚举类型名采用驼峰拼写(首字母大写)，类型名字采用大写并以下划线分隔，每个类型后面是分号<code>;</code></li>
+</ul>
+
+<pre><code class="language-go">enum Foo {
+  FOO_UNSPECIFIED = 0;
+  FOO_FIRST_VALUE = 1;
+  FOO_SECOND_VALUE = 2;
+}
+</code></pre></li>
+</ul>
+
+<p>.proto文件与Java中的.java文件一样，内容结构有顺序，proto文件结构:</p>
+
+<ol>
+<li>License header (if applicable)</li>
+<li>File overview</li>
+<li>Syntax</li>
+<li>Package</li>
+<li>Imports (sorted)</li>
+<li>File options</li>
+<li>Everything else</li>
+</ol>
+
+<h2 id="语法">语法</h2>
+
+<p>下面所有的介绍都是基于proto3版本的Protocol Buffers</p>
+
+<h4 id="定义消息类型">定义消息类型</h4>
+
+<pre><code class="language-go">syntax = &quot;proto3&quot;;
+
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+  int32 result_per_page = 3;
+}
+</code></pre>
+
+<ul>
+<li>syntax指定语法<code>proto3</code>，可选的还有<code>proto2</code>。</li>
+<li>message定义了一个消息结构<code>SearchRequest</code>，消息中定义了三个字段，每个字段都有一个类型、名称以及序号，每个字段均为单一的简单类型。</li>
+<li>每个字段后面都有一个唯一的数字，这个数字用于在二进制消息流中确定字段值，在消息编码的时候，序号值范围<code>1</code>~<code>15</code>只需一个字节，首位为标志位，
+用于标记一个单元数据后续是否还有数据，后三位用于确定wire类型(最多8种，当前已有5种)，这个wire类型并不是单一的类型，而是某种可以通用转换的类型，
+比如int32、int64都是<code>Varint</code>类型，后面编码详细介绍。一个字节中只有4位表示字段序号，最大值即为<code>15</code>，字段序号范围值<code>16</code>~<code>2047</code>只需两个字节，
+字段序号从<code>1</code>开始，最大2<sup>29</sup> - 1，其中<code>19000</code>~<code>19999</code>被Protocol Buffers保留，不可使用。</li>
+</ul>
+
+<p>上面字段都是单一类型，如果需要定义列表或者数组类型，可以通过<code>repeated</code>修饰，在proto3中，<code>repeated</code>字段默认使用<code>packed</code>编码。在一个proto文件中可以
+定义多个消息结构。</p>
+
+<pre><code class="language-go">message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;
+  int32 result_per_page = 3;
+}
+
+message SearchResponse {
+  repeated string names = 1;
+}
+</code></pre>
+
+<p><strong>注释</strong>
+proto文件中注释可以使用<code>//</code>或者<code>/* ... */</code>语法</p>
+
+<pre><code class="language-go">/* SearchRequest represents a search query, with pagination options to
+ * indicate which results to include in the response. */
+
+message SearchRequest {
+  string query = 1;
+  int32 page_number = 2;  // Which page number do we want?
+  int32 result_per_page = 3;  // Number of results to return per page.
+}
+</code></pre>
+
+<p><strong>保留字段</strong></p>
+
+<p>在proto文件中可以定义保留字段，字段序号与字段名不能在同一条<code>reserved</code>语句中</p>
+
+<pre><code class="language-go">message Foo {
+  reserved 2, 15, 9 to 11;
+  reserved &quot;foo&quot;, &quot;bar&quot;;
+}
+</code></pre>
+
+<p><strong>Package</strong></p>
+
+<p>在proto文件中可以增加一个可选的package定义，这样在消息类型中就可以避免消息名冲突。</p>
+
+<pre><code class="language-go">package foo.bar;
+message Open { ... }
+</code></pre>
+
+<pre><code class="language-go">message Foo {
+  ...
+  foo.bar.Open open = 1;
+  ...
+}
+</code></pre>
+
+<p><strong>定义Service</strong></p>
+
+<pre><code class="language-go">service SearchService {
+  rpc Search (SearchRequest) returns (SearchResponse);
+}
+</code></pre>
+
+<p>在proto文件中可以通过import导入另外一个proto文件。</p>
+
+<p>定义了package之后，编译工具在生成对应的使用代码时，包名会有所变化，除非通过option package显示定义文件所在包名。
+如果要生成java代码，可以通过<code>option java_package=com.test</code>定义包路径，生成go使用代码，可以使用<code>option go_package</code>。</p>
+
+<h4 id="字段类型">字段类型</h4>
+
+<p>proto文件中定义的消息字段类型都可以对应到相关编程语言中的字段类型上，下面只展示了Go、Java语言类型对应关系，
+更多开发语言中字段对于关系请参阅<a href="https://developers.google.cn/protocol-buffers/docs/proto3#scalar">官方文档scalar章节</a>。</p>
+
+<table>
+<thead>
+<tr>
+<th align="left">proto Type</th>
+<th align="left">Java Type</th>
+<th align="left">Go Type</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td align="left">double</td>
+<td align="left">double</td>
+<td align="left">float64</td>
+</tr>
+
+<tr>
+<td align="left">float</td>
+<td align="left">float</td>
+<td align="left">float32</td>
+</tr>
+
+<tr>
+<td align="left">int32</td>
+<td align="left">int</td>
+<td align="left">int</td>
+</tr>
+
+<tr>
+<td align="left">int64</td>
+<td align="left">long</td>
+<td align="left">int64</td>
+</tr>
+
+<tr>
+<td align="left">uint32</td>
+<td align="left">int</td>
+<td align="left">uint32</td>
+</tr>
+
+<tr>
+<td align="left">uint64</td>
+<td align="left">long</td>
+<td align="left">uint64</td>
+</tr>
+
+<tr>
+<td align="left">sint32</td>
+<td align="left">int</td>
+<td align="left">int32</td>
+</tr>
+
+<tr>
+<td align="left">sint64</td>
+<td align="left">long</td>
+<td align="left">int64</td>
+</tr>
+
+<tr>
+<td align="left">fixed32</td>
+<td align="left">int</td>
+<td align="left">uint32</td>
+</tr>
+
+<tr>
+<td align="left">fixed64</td>
+<td align="left">long</td>
+<td align="left">uint64</td>
+</tr>
+
+<tr>
+<td align="left">sfixed32</td>
+<td align="left">int</td>
+<td align="left">int32</td>
+</tr>
+
+<tr>
+<td align="left">sfixed64</td>
+<td align="left">long</td>
+<td align="left">int64</td>
+</tr>
+
+<tr>
+<td align="left">bool</td>
+<td align="left">boolean</td>
+<td align="left">bool</td>
+</tr>
+
+<tr>
+<td align="left">string</td>
+<td align="left">String</td>
+<td align="left">string</td>
+</tr>
+
+<tr>
+<td align="left">bytes</td>
+<td align="left">ByteString</td>
+<td align="left">[]byte</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="消息编码">消息编码</h2>
+
+<p>要了解Protocol Buffers编码，首先要了解<code>Base 128 Varints</code>，<code>Varints</code>使用一个或者多个字节去序列化整型。在<code>varint</code>中的每个字节(除了最后一个字节)，
+每个字节中最高位都是一个标志位，用于标明后续还有更多的字节数据，字节中的后7位称为一个组(group)，然后反转group位置。</p>
+
+<p>现在整型<code>1</code>，其二进制为<code>0000 0001</code>，由于1只需要一个字节表示，所以标志位默认为0，只有一个group，无须交换位置，最终其varint编码之后即为其二进制。
+现在整型<code>300</code>，其二进制为<code>1 0010 1100</code>，采用varint编码之后为<code>1010 1100 0000 0010</code>，编码步骤:</p>
+
+<ul>
+<li>以7位分组，<code>1 0010 1100</code>分组后为<code>0000010  0101100</code></li>
+<li>低位组排在前面，交换顺序之后为<code>0101100 0000010</code></li>
+<li>这是一个完整的数据单元，第一个字节后面还有字节数据，高位添加标志位<code>1</code>，第二个字节后面再无数据，高位添加<code>0</code>，最终为<code>10101100 00000010</code></li>
+</ul>
+
+<p>现在varint值为<code>10101100 00000010</code>，如何得到原始值<code>300</code>?</p>
+
+<pre><code class="language-go">10101100 00000010
+#去除标志位
+0101100 0000010
+#交换group位置
+0000010 0101100
+
+100101100
+
+256 + 32 + 8 + 4 = 300
+</code></pre>
+
+<p>这种编码的好处是节省了空间，然后在一些语言中(如Java)，一个int类型数据，需要固定的4个字节，而<code>varint</code>却不是固定长度，类似一种可变整型。</p>
+
+<h4 id="消息结构">消息结构</h4>
+
+<p>在Protocol Buffers中，消息是一系列的key-value对，二进制消息中仅仅使用字段序号(Field Number)作为key，字段的名字与类型在解码之后才确定的。
+当消息编码之后，keys与values都发送到字节流中进行传输，解码时，解析器必须能够跳过未识别的字段，这样新的字段可以加入消息流中而不影响老版本中的程序运行。
+每个key在消息流中都是一个<code>varint</code>，其值包含了两个部分<code>(field_number &lt;&lt; 3) | wire_type</code>，也就是说后三位表示的是<code>wire type</code>，各字段类型在消息流中对应的
+<code>wire type</code>如下。</p>
+
+<p><img src="/blog/go_base/proto.png" alt="proto" /></p>
+
+<p><strong>int32字段类型的消息结构</strong></p>
+
+<pre><code class="language-go">message Test1 {
+  int32 a = 1;
+}
+</code></pre>
+
+<p>其对应的wire type是0，把a的值设置为150，序列化这个消息到输出流，最终传输的值(十六进制)</p>
+
+<pre><code class="language-go">08 96 01
+</code></pre>
+
+<p>如果用XML来表示这个消息，与Protocol Buffers相比，XML传输的数据比当前应该要大的多，这就是Protocol Buffers的优势。在Protocol Buffers消息流中，key永远都是一个<code>varint</code>，下面分析这个消息数据如何解析成<code>08 96 01</code>。</p>
+
+<ul>
+<li>字段序号是1，wire type是0，后三位用于表示wire type，key的varint值为<code>00001000</code>，即0x08</li>
+<li>字段a的值为150，根据上面varint编码规则，150编码之后二进制为<code>1001 0110 0000 0001</code>，即0x96 0x01</li>
+<li>wire type是0的字段，在消息流中value是紧跟着key，即keyvalue=0x08 0x96 0x01</li>
+</ul>
+
+<p><strong>string字段类型的消息结构</strong></p>
+
+<pre><code class="language-go">message Test2 {
+  string b = 2;
+}
+</code></pre>
+
+<p>其wire type对应的是2，如果b的值设置为&rdquo;testing&rdquo;，消息编码之后值为多少？</p>
+
+<ul>
+<li>key是varint，后三位表示wire type 2，即010，字段序号也为2，也表示为010，最终key为<code>0001 0010</code>，即0x12</li>
+<li>wire type类型为2，key之后跟着的不再是其value，而是value的长度，即&rdquo;testing&rdquo;的字节长度7，value长度也是用一个varint<code>0000 0111</code>, 即0x07</li>
+<li>长度之后则是value内容，此时不再是varint，而是字符串中每个字符的acsii码值。</li>
+</ul>
+
+<p>最终消息内容=key + value长度 + value，即十六进制12 07 <code>74 65 73 74 69 6e 67</code>，红色即为&rdquo;testing&rdquo;的ascii值。</p>
+
+<p><strong>内嵌消息结构</strong></p>
+
+<pre><code class="language-go">message Test3 {
+  Test1 c = 3;
+}
+</code></pre>
+
+<p>将Test1字段a的值仍然设置为150，编码之后其值？</p>
+
+<p>其wire type也为2，字段序号是3，其key表示为<code>00011010</code>，即0x1A，长度为消息Test1的长度，即0x03，编码之后的值为十六进制的1A 03 <code>08 96 01</code>。</p>
+
+<p><strong>数组字段类型的消息结构</strong></p>
+
+<p>repeated默认的编码采用的是<code>packed</code>，其对应的wire type也是2。</p>
+
+<pre><code class="language-go">message Test4 {
+  repeated int32 d = 4;
+}
+</code></pre>
+
+<p>给字段<code>d</code>提供三个值，分别为3, 270, 86942，编码后的值为</p>
+
+<pre><code class="language-go">22        // key (field number 4, wire type 2)
+06        // payload size (6 bytes)
+03        // first element (varint 3)
+8E 02     // second element (varint 270)
+9E A7 05  // third element (varint 86942)
+</code></pre>
+
+<p>对于整型，采用Varint方式编码非常灵活，相比wire type为1、5的固定长度类型，传输的数据更少。
+详细的编码介绍，请参阅<a href="https://developers.google.cn/protocol-buffers/docs/encoding">官方文档</a>。</p>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/grpc/" rel="tag">grpc</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+	
+	<li><a href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/kubernetes_curl_apiserver/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">CURL探索Kubernetes API Server</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/grpc/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">使用Golang部署gRPC服务</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

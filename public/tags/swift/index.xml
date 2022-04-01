@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>swift on </title>
+    <link>/tags/swift/</link>
+    <description>Recent content in swift on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 02 Jun 2019 13:05:32 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/swift/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Helm架构与中心化部署解决方案</title>
+      <link>/post/helm_design/</link>
+      <pubDate>Sun, 02 Jun 2019 13:05:32 +0800</pubDate>
+      
+      <guid>/post/helm_design/</guid>
+      <description>随着Google容器调度平台Kubernetes的开源，很多社区与项目逐渐涌现，Helm就是其中之一。Helm可以理解成是Kubernetes的包管理工具， 类似rpm与CentOS、dpkg与Debian的关系。在Helm中，安装包被称为Chart，Helm定义了包的文件结构以及语法规范，</description>
+    </item>
+    
+  </channel>
+</rss>

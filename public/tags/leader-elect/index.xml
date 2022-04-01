@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Leader Elect on </title>
+    <link>/tags/leader-elect/</link>
+    <description>Recent content in Leader Elect on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Mon, 11 Mar 2019 15:14:25 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/leader-elect/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>基于数据库的简单Leader Elect</title>
+      <link>/post/leader_elect_golang/</link>
+      <pubDate>Mon, 11 Mar 2019 15:14:25 +0800</pubDate>
+      
+      <guid>/post/leader_elect_golang/</guid>
+      <description>某个系统只用来执行定时任务，如果只部署单台服务，那么又容易单点故障，如果部署多台服务，又如何只保证每次只会其中一台去执行呢，在这里，可以对N台服务，做一个简单的leader elect，成为leader的实例才可以去执行定时任务。虽然当前出现很多开源的leader选举组件，比如zookeep</description>
+    </item>
+    
+  </channel>
+</rss>

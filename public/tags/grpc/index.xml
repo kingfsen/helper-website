@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>grpc on </title>
+    <link>/tags/grpc/</link>
+    <description>Recent content in grpc on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Sun, 02 Jun 2019 13:05:32 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/grpc/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Helm架构与中心化部署解决方案</title>
+      <link>/post/helm_design/</link>
+      <pubDate>Sun, 02 Jun 2019 13:05:32 +0800</pubDate>
+      
+      <guid>/post/helm_design/</guid>
+      <description>随着Google容器调度平台Kubernetes的开源，很多社区与项目逐渐涌现，Helm就是其中之一。Helm可以理解成是Kubernetes的包管理工具， 类似rpm与CentOS、dpkg与Debian的关系。在Helm中，安装包被称为Chart，Helm定义了包的文件结构以及语法规范，</description>
+    </item>
+    
+    <item>
+      <title>使用Golang部署gRPC服务</title>
+      <link>/post/grpc/</link>
+      <pubDate>Fri, 31 May 2019 16:51:12 +0800</pubDate>
+      
+      <guid>/post/grpc/</guid>
+      <description>gRPC与大多数RPC框架一样，通过定义一个服务Service，然后明确指定能够被远程调用的方法。gRPC默认使用Protocol Buffers作为接口定义语言以及消息传输格式， 当然也可以使用其它可替代的协议，关于Protocol Buffers的介绍请参考gRPC协议Protocol Buf</description>
+    </item>
+    
+    <item>
+      <title>gRPC协议Protocol Buffers</title>
+      <link>/post/protocol_buffers/</link>
+      <pubDate>Thu, 30 May 2019 16:39:50 +0800</pubDate>
+      
+      <guid>/post/protocol_buffers/</guid>
+      <description>Protocol Buffers是一种灵活、高效、自动序列化结构数据的协议，当前有两个版本，分别是proto2与proto3，两个版本的协议不能完全兼容。 proto3简化了协议使用，生成的协议使用代码支持更多的编程语言，如Java、C++、Python、Java、Lite、Ruby、JavaScript、</description>
+    </item>
+    
+  </channel>
+</rss>

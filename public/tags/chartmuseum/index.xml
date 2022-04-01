@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>chartmuseum on </title>
+    <link>/tags/chartmuseum/</link>
+    <description>Recent content in chartmuseum on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 19 Mar 2019 10:02:41 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/chartmuseum/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Helm Harbor</title>
+      <link>/post/helm_harbor/</link>
+      <pubDate>Tue, 19 Mar 2019 10:02:41 +0800</pubDate>
+      
+      <guid>/post/helm_harbor/</guid>
+      <description>chartmuseum chartmuseum是helm chart的仓库，它的存储层支持FileSystem以及各大云厂商的对象存储中间件， 默认支持阿里云的OSS、百度的BOS、Amazon S3、Microsoft Azure、Oracle、Openstack、Google等， 其他厂商需自行实现Storage的B</description>
+    </item>
+    
+  </channel>
+</rss>

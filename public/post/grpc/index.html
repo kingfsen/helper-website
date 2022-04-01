@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html class="no-js" lang="zh-cn">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title>使用Golang部署gRPC服务 - </title>
+	<script>(function(d,e){d[e]=d[e].replace("no-js","js");})(document.documentElement,"className");</script>
+	<script type="text/javascript" src="/js/jquery.min.js"></script>
+	
+	<script src="/js/jquery.toTop.min.js"></script>
+	
+	<meta name="description" content="grpc的基础概念以及服务构建详细介绍">
+	<meta name="generator" content="Hugo 0.55.6" />
+	
+	
+	<link rel="dns-prefetch" href="//fonts.googleapis.com">
+	<link rel="dns-prefetch" href="//fonts.gstatic.com">
+	<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Open+Sans:400,400i,700">
+	<link rel="stylesheet" href="/css/style.css">	
+	<link rel="stylesheet" type="text/css" href="/css/highlight.css">
+	
+	
+	<link rel="stylesheet" href="/css/share.min.css">
+	<script src="/js/social-share.min.js"></script>
+	<script src="/js/qrcode.js"></script>
+	
+	
+	<link rel="shortcut icon" href="/favicon.ico">
+		
+	
+</head>
+<body class="body">
+	<div class="container container--outer">
+		<header class="header">
+	<div class="container">
+		<div class="logo">
+			<a class="logo__link" href="/" title="" rel="home">
+			<div class="logo__title"></div>			
+				 
+			</a>
+			
+			<div class="float_right"><div class="social-share"></div>
+  <br/></div>
+			
+		</div>
+		
+<nav class="menu">
+	<button class="menu__btn" aria-haspopup="true" aria-expanded="false" tabindex="0">
+		<span class="menu__btn-title" tabindex="-1">选择</span>
+	</button>
+	<ul class="menu__list">
+		<li class="menu__item">
+			<a class="menu__link" href="/post/">博客</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/about/">名站导航</a>
+		</li>
+		<li class="menu__item">
+			<a class="menu__link" href="/timeline/">时间轴</a>
+		</li>
+	</ul>
+</nav>
+
+	</div>
+</header>
+		<div class="wrapper flex">
+			<div class="primary">
+			
+<main class="main" role="main">
+	<article class="post">
+		<header class="post__header">
+			<h1 class="post__title">使用Golang部署gRPC服务</h1>
+			<div class="post__meta meta">
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text" datetime="2019-05-31T16:51:12">2019-05-31</time>
+</div>
+
+<div class="meta__item-categories meta__item">
+	<svg class="meta__icon icon icon-category" width="16" height="16" viewBox="0 0 16 16"><path d="m7 2l1 2h8v11h-16v-13z"/></svg>
+	<span class="meta__text"><a class="meta__link" href="/categories/golang" rel="category">golang</a></span>
+</div>
+<div class="meta__item-datetime meta__item">
+	<svg class="meta__icon icon icon-time" width="16" height="14" viewBox="0 0 30 28"><path d="M15 0C7 0 1 6 1 14s6 14 14 14 14-6 14-14S23 0 15 0zm0 25C9 25 4 20 4 14S9 3 15 3s11 5 11 11-5 11-11 11zm1-18h-2v8.4l6.8 4.4L22 18l-6-3.8V7z"/></svg>
+	<time class="meta__text">9 分钟</time>
+</div></div>
+		</header>
+
+  
+    <div class="toc">
+        <div class="toc__title"><span id="toc_menu_tip">展开书签</span></div>
+        <div class="toc__menu">
+          <nav id="TableOfContents">
+<ul>
+<li>
+<ul>
+<li><a href="#编写proto文件">编写proto文件</a></li>
+<li><a href="#生成代码">生成代码</a></li>
+<li><a href="#实现服务端代码">实现服务端代码</a></li>
+<li><a href="#实现客户端代码">实现客户端代码</a></li>
+<li><a href="#grpc网关服务">gRPC网关服务</a>
+<ul>
+<li><a href="#annotation方式">annotation方式</a></li>
+<li><a href="#yaml配置方式">YAML配置方式</a></li>
+<li><a href="#部署http网关服务">部署http网关服务</a></li>
+</ul></li>
+</ul></li>
+</ul>
+</nav>
+        </div>  
+    </div>
+    <script type="text/javascript">
+    $(".toc__title").click( function () {
+      if($(".toc__menu").css('display') == 'none') {
+        $(".toc__menu").show(); 
+        $("#toc_menu_tip").html("收起书签");
+      } else {
+        $(".toc__menu").hide(); 
+        $("#toc_menu_tip").html("展开书签");
+      }
+    });
+    </script>
+  
+<div class="content post__content clearfix">
+			
+
+<p>gRPC与大多数RPC框架一样，通过定义一个服务Service，然后明确指定能够被远程调用的方法。gRPC默认使用Protocol Buffers作为接口定义语言以及消息传输格式，
+当然也可以使用其它可替代的协议，关于Protocol Buffers的介绍请参考<a href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a>。</p>
+
+<p>gRPC可以定义四种类型的服务方法</p>
+
+<ul>
+<li><strong>Unary RPCs</strong> 客户端发送一个请求到服务端，然后从服务端得到一个返回的响应，类似一个普通方法的调用。</li>
+</ul>
+
+<pre><code class="language-go">rpc SayHello(HelloRequest) returns (HelloResponse){
+}
+</code></pre>
+
+<ul>
+<li><strong>Server streaming RPCs</strong> 客户端发送一个请求到服务端，然后得到一个流去读取返回的一系列消息。客户端从返回的流中读取数据直到流中没有数据可读取，在单个
+独立的调用过程中gRPC保证了消息的时序性。</li>
+</ul>
+
+<pre><code class="language-go">rpc LotsOfReplies(HelloRequest) returns (stream HelloResponse){
+}
+</code></pre>
+
+<ul>
+<li><strong>Client streaming RPCs</strong> 客户端通过提供的一个流，写一系列的消息并发送到服务端。客户端一旦完成了消息的写入，则等待服务端读取消息获取返回结果，在单个
+独立的调用过程中gRPC保证了消息的时序性。</li>
+</ul>
+
+<pre><code class="language-go">rpc LotsOfGreetings(stream HelloRequest) returns (HelloResponse) {
+}
+</code></pre>
+
+<ul>
+<li><strong>Bidirectional streaming RPCs</strong> 客户端与服务端分别使用一个读写流发送一系列的消息，两个流操作独立，读写顺序无任何要求，如服务端在写消息之前，可以等待接收
+客户端发送的所有消息，活着读一个消息，然后发送一个消息。</li>
+</ul>
+
+<pre><code class="language-go">rpc BidiHello(stream HelloRequest) returns (stream HelloResponse){
+}
+</code></pre>
+
+<p>通过编译工具生成代码之后，服务端需要实现Service的相关方法，客户端通过一个存根对象直接调用Service的方法。</p>
+
+<h2 id="编写proto文件">编写proto文件</h2>
+
+<p>首先编写一个student.proto文件</p>
+
+<pre><code class="language-go">syntax = &quot;proto3&quot;;
+
+option go_package = &quot;sunjinfu/api/proto&quot;;
+
+import &quot;google/protobuf/empty.proto&quot;;
+
+
+message SearchRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message SearchResponse {
+  repeated Student students = 1;
+}
+
+message Student {
+  int64 id = 1;
+  string name = 2;
+  Address address = 3;
+}
+
+message Address {
+  string street = 1;
+  string postcode = 2;
+}
+
+service StudentService {
+
+  rpc GetAllStudents(google.protobuf.Empty) returns (SearchResponse);
+  
+  rpc AddStudent(Student) returns (google.protobuf.Empty);
+  
+  rpc SearchStudent(SearchRequest) returns (Student);
+  
+  rpc GetStudent(stream SearchRequest) returns (SearchResponse);
+}
+</code></pre>
+
+<h2 id="生成代码">生成代码</h2>
+
+<ul>
+<li>安装Protocol Buffers v3编译工具</li>
+</ul>
+
+<p>编译工具下载地址: <a href="https://github.com/protocolbuffers/protobuf/releases">https://github.com/protocolbuffers/protobuf/releases</a> ，请选择对应的系统版本下载，比如windows选择<code>protoc-3.8.0-win64</code>，然后解压文件，
+bin目录下有可执行程序protoc，将其路径添加到环境变量PATH中。include目录下是google自带的一些proto文件，这些proto文件定义了一些公共的消息类型，
+例如上面student.proto导入了google/protobuf/empty.proto，在编译的时候必须把这个目录带上，否则会编译报错，找不到文件。</p>
+
+<ul>
+<li>安装编译插件protoc-gen-go</li>
+</ul>
+
+<pre><code class="language-go">go get -u github.com/golang/protobuf/protoc-gen-go
+</code></pre>
+
+<p>protoc-gen-go安装成功之后，可执行程序文件路径为$GOPATH/bin，请把$GOPATH/bin添加到系统环境变量PATH中，否则protoc在编译proto文件时无法找到插件。</p>
+
+<p>以本机windows为例，把student.proto移动到E:\grpc\proto下，同时把protoc官方proto包(google/protobuf)移动到E:\grpc\include目录下。</p>
+
+<pre><code class="language-bash">$ protoc -IE:/grpc/proto -IE:/grpc/include --go_out=plugins=grpc:. student.proto
+</code></pre>
+
+<p>命令执行成功之后，则在当前命令执行的路径下生成定义的包sunjinfu/api/proto，包下对应的文件student.pb.go，一般不要手动去修改该文件中的内容。</p>
+
+<blockquote>
+<ul>
+<li>注意:如果&ndash;go_out未添加plugins，则pb.go文件中不会生成相关Service相关服务的调用方法，只有消息类型相关处理方法。</li>
+</ul>
+</blockquote>
+
+<h2 id="实现服务端代码">实现服务端代码</h2>
+
+<p>编写grpc服务代码时依赖了google的grpc包，需要科学上网获取该包，以及该包的一些依赖包，主要是golang.org/x等。</p>
+
+<pre><code class="language-go">go get -u google.golang.org/grpc
+</code></pre>
+
+<p>新建一个golang项目，将上述生成的包sunjinfu/api/proto添加到$GOPATH中，从生成student.pb.go文件中可知，服务端只需实现如下四个接口即可。</p>
+
+<pre><code class="language-go">// StudentServiceServer is the server API for StudentService service.
+type StudentServiceServer interface {
+    GetAllStudents(context.Context, *empty.Empty) (*SearchResponse, error)
+    AddStudent(context.Context, *Student) (*empty.Empty, error)
+    SearchStudent(context.Context, *SearchRequest) (*Student, error)
+    GetStudent(StudentService_GetStudentServer) error
+}
+</code></pre>
+
+<p>编写一个main.go文件，实现以上四个接口，这里简单Mock返回数据，然后启动gRPC服务端。</p>
+
+<pre><code class="language-go">package main
+
+import (
+    &quot;context&quot;
+    &quot;github.com/golang/protobuf/ptypes/empty&quot;
+    &quot;google.golang.org/grpc&quot;
+    &quot;io&quot;
+    &quot;log&quot;
+    &quot;net&quot;
+    &quot;sunjinfu/api/proto&quot;
+)
+
+const (
+    port = &quot;:50051&quot;
+)
+
+type server struct {}
+
+func (s *server) GetAllStudents(ctx context.Context, req *empty.Empty) (*proto.SearchResponse, error) {
+    log.Printf(&quot;GetAllStudents invoke&quot;)
+    //Mock business to get data
+    var students []*proto.Student
+    s1 := &amp;proto.Student{
+        Id: 1,
+        Name: &quot;开发者&quot;,
+        Address: &amp;proto.Address{
+            Street: &quot;Zh.Load&quot;,
+            Postcode: &quot;100020&quot;,
+        },
+    }
+    s2 := &amp;proto.Student{
+        Id: 2,
+        Name: &quot;测试者&quot;,
+        Address: &amp;proto.Address{
+            Street: &quot;En.Load&quot;,
+            Postcode: &quot;100021&quot;,
+        },
+    }
+    students = append(students, s1, s2)
+
+    response := &amp;proto.SearchResponse{Students: students}
+
+    return response, nil
+}
+
+func (s *server) AddStudent(ctx context.Context, req *proto.Student) (*empty.Empty, error) {
+    log.Printf(&quot;AddStudent invoke, param: %+v&quot;, *req)
+    //Mock business logic
+    log.Printf(&quot;Add student successfully&quot;)
+    return nil, nil
+}
+
+func (s *server) SearchStudent(ctx context.Context, req *proto.SearchRequest) (*proto.Student, error) {
+    log.Printf(&quot;SearchStudent invoke, param: %+v&quot;, *req)
+
+    //Mock business search logic
+    log.Printf(&quot;Search student successfully&quot;)
+
+    return &amp;proto.Student{
+        Id: 2,
+        Name: &quot;测试者&quot;,
+        Address: &amp;proto.Address{
+            Street: &quot;En.Load&quot;,
+            Postcode: &quot;100021&quot;,
+        },
+    }, nil
+
+}
+
+func (s *server) GetStudent(stream proto.StudentService_GetStudentServer) error {
+    log.Printf(&quot;GetStudent invoke&quot;)
+    for {
+        sr, err := stream.Recv()
+        if err == io.EOF {
+            //Mock return data
+            var students []*proto.Student
+            s1 := &amp;proto.Student{
+                Id: 1,
+                Name: &quot;开发者&quot;,
+                Address: &amp;proto.Address{
+                    Street: &quot;Zh.Load&quot;,
+                    Postcode: &quot;100020&quot;,
+                },
+            }
+            s2 := &amp;proto.Student{
+                Id: 2,
+                Name: &quot;测试者&quot;,
+                Address: &amp;proto.Address{
+                    Street: &quot;En.Load&quot;,
+                    Postcode: &quot;100021&quot;,
+                },
+            }
+            students = append(students, s1, s2)
+            return stream.SendAndClose(&amp;proto.SearchResponse{
+                Students: []*proto.Student{s1, s2},
+            })
+        }
+        log.Printf(&quot;Receive message: %v&quot;, *sr)
+        if err != nil {
+            log.Printf(&quot;Receive message occured error: %v&quot;, err)
+            return err
+        }
+    }
+}
+
+func main() {
+    lis, err := net.Listen(&quot;tcp&quot;, port)
+    if err != nil {
+        log.Fatalf(&quot;Failed to listen: %v&quot;, err)
+    }
+    s := grpc.NewServer()
+    proto.RegisterStudentServiceServer(s, &amp;server{})
+    if err := s.Serve(lis); err != nil {
+        log.Fatalf(&quot;Failed to serve: %v&quot;, err)
+    }
+}
+</code></pre>
+
+<p>运行main.go文件，成功启动之后，gRPC则在端口50051提供服务。</p>
+
+<h2 id="实现客户端代码">实现客户端代码</h2>
+
+<p>编写一个main文件，调用gRPC服务端，注意使用stream请求参数类型的方法调用。</p>
+
+<pre><code class="language-go">package main
+
+import (
+    &quot;context&quot;
+    &quot;github.com/golang/protobuf/ptypes/empty&quot;
+    &quot;google.golang.org/grpc&quot;
+    &quot;log&quot;
+    &quot;strconv&quot;
+    &quot;strings&quot;
+    &quot;sunjinfu/api/proto&quot;
+    &quot;time&quot;
+)
+
+const (
+    address = &quot;localhost:50051&quot;
+)
+
+func main() {
+    conn, err := grpc.Dial(address, grpc.WithInsecure())
+    if err != nil {
+        log.Printf(&quot;Can not connect gRPC server: %v&quot;, err)
+    }
+    defer conn.Close()
+    c := proto.NewStudentServiceClient(conn)
+    ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+    defer cancel()
+    response, err := c.GetAllStudents(ctx, &amp;empty.Empty{})
+    if err != nil {
+        log.Fatalf(&quot;Failed to invoke GetAllStudents, err: %v&quot;, err)
+    }
+    log.Printf(&quot;GetAllStudents response message: %v&quot;, *response)
+
+    student, err := c.SearchStudent(ctx, &amp;proto.SearchRequest{Name: &quot;test&quot;})
+    if err != nil {
+        log.Printf(&quot;Failed to invoke SearchStudent, err: %v&quot;, err)
+    }
+    log.Printf(&quot;SearchStudent response message: %v&quot;, *student)
+
+    _, err = c.AddStudent(ctx, &amp;proto.Student{
+            Id: 10,
+            Name: &quot;sunjinfu&quot;,
+            Address: &amp;proto.Address{
+                Street: &quot;Load&quot;,
+                Postcode: &quot;100020&quot;,
+            },
+        })
+    if err != nil {
+        log.Printf(&quot;Failed to invoke AddStudent, err: %v&quot;, err)
+    }
+
+    //注意这个请求参数是stream类型的方法
+    stream, err := c.GetStudent(ctx)
+    if err != nil {
+        log.Printf(&quot;Failed to invoke  GetStudent, err: %v&quot;, err)
+    } else {
+        //发送10个SearchRequest消息
+        for a := 0; a &lt; 10; a++ {
+            sr := &amp;proto.SearchRequest{
+                Id: strconv.Itoa(a),
+                Name: strings.Join([]string{&quot;name&quot;, strconv.Itoa(a)}, &quot;&quot;)}
+            err = stream.Send(sr)
+            if err != nil {
+                log.Printf(&quot;Failed to send message, err: %v&quot;, err)
+            }
+        }
+        reply, err := stream.CloseAndRecv()
+        if err != nil {
+            log.Printf(&quot;Failed to get reply message from server, err: %v&quot;, reply)
+        } else {
+            log.Printf(&quot;GetStudent reply message: %v&quot;, *reply)
+        }
+
+    }
+}
+</code></pre>
+
+<p>查看客户端调用日志</p>
+
+<pre><code class="language-bash">2019/06/01 08:53:01 GetAllStudents response message: {[id:1 name:&quot;\345\274\200\345\217\221\350\200\205&quot; address:&lt;street:&quot;Zh.Load&quot; postcode:&quot;100020&quot; &gt;  id:2 name:&quot;\346\265\213\350\257\225\350\200\205&quot; address:&lt;street:&quot;En.Load&quot; postcode:&quot;100021&quot; &gt; ] {} [] 0}
+2019/06/01 08:53:01 SearchStudent response message: {2 测试者 street:&quot;En.Load&quot; postcode:&quot;100021&quot;  {} [] 0}
+2019/06/01 08:53:01 GetStudent reply message: {[id:1 name:&quot;\345\274\200\345\217\221\350\200\205&quot; address:&lt;street:&quot;Zh.Load&quot; postcode:&quot;100020&quot; &gt;  id:2 name:&quot;\346\265\213\350\257\225\350\200\205&quot; address:&lt;street:&quot;En.Load&quot; postcode:&quot;100021&quot; &gt; ] {} [] 0}
+</code></pre>
+
+<p>查看gRPC服务端日志</p>
+
+<pre><code class="language-bash">2019/06/01 08:53:01 GetAllStudents invoke
+2019/06/01 08:53:01 SearchStudent invoke, param: {Id: Name:test XXX_NoUnkeyedLiteral:{} XXX_unrecognized:[] XXX_sizecache:0}
+2019/06/01 08:53:01 Search student successfully
+2019/06/01 08:53:01 AddStudent invoke, param: {Id:10 Name:sunjinfu Address:street:&quot;Load&quot; postcode:&quot;100020&quot;  XXX_NoUnkeyedLiteral:{} XXX_unrecognized:[] XXX_sizecache:0}
+2019/06/01 08:53:01 Add student successfully
+2019/06/01 08:53:01 GetStudent invoke
+2019/06/01 08:53:01 Receive message: {0 name0 {} [] 0}
+2019/06/01 08:53:01 Receive message: {1 name1 {} [] 0}
+2019/06/01 08:53:01 Receive message: {2 name2 {} [] 0}
+2019/06/01 08:53:01 Receive message: {3 name3 {} [] 0}
+2019/06/01 08:53:01 Receive message: {4 name4 {} [] 0}
+2019/06/01 08:53:01 Receive message: {5 name5 {} [] 0}
+2019/06/01 08:53:01 Receive message: {6 name6 {} [] 0}
+2019/06/01 08:53:01 Receive message: {7 name7 {} [] 0}
+2019/06/01 08:53:01 Receive message: {8 name8 {} [] 0}
+2019/06/01 08:53:01 Receive message: {9 name9 {} [] 0}
+</code></pre>
+
+<h2 id="grpc网关服务">gRPC网关服务</h2>
+
+<p>用golang提供的gRPC服务端，可接受任何语言编写的客户端请求，但有时很多系统只提供了http rest请求方式，并没有开发客户端，这就需要在gRPC服务端之前部署一个http的代理服务，
+这个http服务类似是gRPC的网关，这样需要与gRPC服务端交互的系统，直接以http rest方式请求grpc-gateway，gateway将对应的请求转发给gRPC服务端。</p>
+
+<p><img src="/blog/go_base/gateway.png" alt="proto" /></p>
+
+<p>要使用grpc-gateway，同样需要根据.proto文件生成对应语言的代码，通过编译工具插件protoc-gen-grpc-gateway可实现。</p>
+
+<pre><code class="language-go">go get -u github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway
+</code></pre>
+
+<p>安装成功之后，protoc-gen-grpc-gateway可执行文件则移动到$GOPATH/bin目录路下，也可以手动进入源代码目录执行<code>go build -v</code>，然后copy到任何$PATH中包含的目录。
+生成grpc-gateway代码有两种方式，一种是直接在.proto文件中添加annotation，另外一种则是通过yaml配置文件进行配置，无需修改原始的proto文件，两种方式根据各自场景进行选择，
+比如proto文件是公共文件，可能会在多个项目中使用，那么最好的方式就是选择基于yaml配置生成，不去修改proto文件。</p>
+
+<p>由于http rest风格请求，请求参数都在请求path中，必须与gRPC中的消息结构字段一致，如下面这个代码，<code>{}</code>中的名称与Service方法中的参数对象中字段保持一致。</p>
+
+<pre><code class="language-go">/ Returns a specific book.
+rpc GetBook(GetBookRequest) returns (Book) {
+  // Client example - get the first book from the second shelf:
+  //   curl http://DOMAIN_NAME/v1/shelves/2/books/1
+  option (google.api.http) = { get: &quot;/v1/shelves/{shelf}/books/{book}&quot; };
+}
+...
+// Request message for GetBook method.
+message GetBookRequest {
+  // The ID of the shelf from which to retrieve a book.
+  int64 shelf = 1;
+  // The ID of the book to retrieve.
+  int64 book = 2;
+}
+</code></pre>
+
+<h3 id="annotation方式">annotation方式</h3>
+
+<p>首先修改student.proto文件，给每个需要通过http rest请求的方法添加<code>option</code>，同时import相应的<code>annotations.proto</code>包。</p>
+
+<pre><code class="language-go">syntax = &quot;proto3&quot;;
+
+option go_package = &quot;sunjinfu/api/proto&quot;;
+
+import &quot;google/protobuf/empty.proto&quot;;
+
+import &quot;google/api/annotations.proto&quot;;
+
+message SearchRequest {
+  string id = 1;
+  string name = 2;
+}
+
+message SearchResponse {
+  repeated Student students = 1;
+}
+
+message Student {
+  int64 id = 1;
+  string name = 2;
+  Address address = 3;
+}
+
+message Address {
+  string street = 1;
+  string postcode = 2;
+}
+
+service StudentService {
+
+  rpc GetAllStudents(google.protobuf.Empty) returns (SearchResponse) {
+    option (google.api.http) = { get: &quot;/v1/students&quot; };
+  }
+  
+  rpc AddStudent(Student) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: &quot;/v1/students&quot;
+      body: &quot;*&quot; 
+    };
+  }
+  
+  rpc SearchStudent(SearchRequest) returns (Student) {
+    option (google.api.http) = { get: &quot;/v1/students/ids/{id}/names/{name}&quot; };
+  }
+  
+  rpc GetStudent(stream SearchRequest) returns (SearchResponse) {
+    option (google.api.http) = { get: &quot;/v2/students&quot; };
+  }
+}
+</code></pre>
+
+<p>proto文件添加annotation之后，再通过编译插件生成对应的代码，注意带有stream类型参数的方法映射URL是不允许有path参数的。</p>
+
+<pre><code class="language-bash">protoc -Ie:/grpc/include -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+-Ie:/grpc/proto --grpc-gateway_out=logtostderr=true:. student.proto
+</code></pre>
+
+<p>命令成功之后，则会在指定的包下生成对应的文件student.pb.gw.go。</p>
+
+<h3 id="yaml配置方式">YAML配置方式</h3>
+
+<p>这种方式无需修改proto文件内容，只需要编写一个yaml文件student_api.yaml，在yaml文件中对需要通过http rest方式请求的方法进行配置。</p>
+
+<pre><code class="language-go">type: google.api.Service
+config_version: 3
+
+http: 
+  rules: 
+  - selector: StudentService.GetAllStudents
+    get: /v1/students
+  - selector: StudentService.AddStudent
+    post: &quot;/v1/students&quot;
+    body: &quot;*&quot;
+  - selector: StudentService.SearchStudent
+    get: /v1/students/ids/{id}/names/{name}
+  - selector: StudentService.GetStudent
+    get: /v2/students
+</code></pre>
+
+<p>执行命令生成代码，通过参数<code>grpc_api_configuration</code>指定yaml文件。</p>
+
+<pre><code class="language-bash">protoc -Ie:/grpc/include -I$GOPATH/src/github.com/grpc-ecosystem/grpc-gateway/third_party/googleapis \
+-Ie:/grpc/proto --grpc-gateway_out=logtostderr=true,grpc_api_configuration=student_api.yaml:. student.proto
+</code></pre>
+
+<h3 id="部署http网关服务">部署http网关服务</h3>
+
+<p>首先将生成的student.gw.pb.go文件也添加到$GOPATH/sunjinfu/api/proto包下，然后新建一个main.go文件，编写http server代码。</p>
+
+<pre><code class="language-go">package main
+
+import (
+    &quot;context&quot;
+    &quot;github.com/grpc-ecosystem/grpc-gateway/runtime&quot;
+    &quot;google.golang.org/grpc&quot;
+    &quot;log&quot;
+    &quot;net/http&quot;
+    &quot;sunjinfu/api/proto&quot;
+)
+
+
+func run() error {
+
+    endpoint := &quot;localhost:50051&quot;
+
+    ctx := context.Background()
+    ctx, cancel := context.WithCancel(ctx)
+    defer cancel()
+
+    mux := runtime.NewServeMux()
+    opts := []grpc.DialOption{grpc.WithInsecure()}
+    err := proto.RegisterStudentServiceHandlerFromEndpoint(ctx, mux, endpoint, opts)
+    if err != nil {
+        log.Printf(&quot;Failed to connet to gRPC server, err: %v&quot;, err)
+        return err
+    }
+    return http.ListenAndServe(&quot;:8080&quot;, mux)
+}
+
+func main() {
+    if err := run(); err != nil {
+        log.Fatal(err)
+    }
+}
+</code></pre>
+
+<p>http网关服务启动成功之后，通过<code>curl</code>请求8080端口服务(部分输出信息已截断)。</p>
+
+<pre><code class="language-bash">$ curl -X GET http://localhost:8080/v1/students
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   176  100   176    0     0  11733      0 --:--:-- --:--:-- --:--:-- 11733
+{&quot;students&quot;:[{&quot;id&quot;:&quot;1&quot;,&quot;name&quot;:&quot;开发者&quot;,&quot;address&quot;:{&quot;street&quot;:&quot;Zh.Load&quot;,&quot;postcode&quot;:&quot;100020&quot;}}...}]}
+
+$ curl -X GET http://localhost:8080/v2/students
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   176  100   176    0     0  11000      0 --:--:-- --:--:-- --:--:-- 11000
+{&quot;students&quot;:[{&quot;id&quot;:&quot;1&quot;,&quot;name&quot;:&quot;开发者&quot;,&quot;address&quot;:{&quot;street&quot;:&quot;Zh.Load&quot;,&quot;postcode&quot;:&quot;100020&quot;}}...}]}
+
+
+</code></pre>
+
+		</div>
+		
+<div class="post__tags tags clearfix">
+	<svg class="icon icon-tag" width="16" height="16" viewBox="0 0 32 32"><path d="M32 19c0 1-1 2-1 2L21 31s-1 1-2 1-2-1-2-1L2 16c-1-1-1.4-2-1.4-2S0 12.5 0 11V3C0 1.5.8.8.8.8S1.5 0 3 0h8c1.5 0 3 .6 3 .6S15 1 16 2l15 15s1 1 1 2zM7 10a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/></svg>
+	<ul class="tags__list">
+		<li class="tags__item"><a class="tags__link btn" href="/tags/grpc/" rel="tag">grpc</a></li>
+	</ul>
+</div>
+	</article>
+</main>
+<div class="social-share"></div>
+  <br/>
+
+
+
+
+<aside class="sidebar">
+<h4>相关文章</h4>
+<div class="widget__content">
+		<ul class="widget__list">
+	
+	<li><a href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+	
+	<li><a href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+	
+</ul>
+</div>
+<br/>
+</aside>
+
+
+<nav class="post-nav flex">
+	<div class="post-nav__item post-nav__item--prev">
+		<a class="post-nav__link" href="/post/protocol_buffers/" rel="prev"><span class="post-nav__caption">«&thinsp;前一篇</span><p class="post-nav__post-title">gRPC协议Protocol Buffers</p></a>
+	</div>
+	<div class="post-nav__item post-nav__item--next">
+		<a class="post-nav__link" href="/post/helm_design/" rel="next"><span class="post-nav__caption">后一篇&thinsp;»</span><p class="post-nav__post-title">Helm架构与中心化部署解决方案</p></a>
+	</div>
+</nav>
+
+
+
+<script data-isso="/isso/" src="/isso/js/embed.min.js"></script>
+<section id="isso-thread"></section>
+
+
+			</div>
+			<aside class="sidebar"><div class="widget-search widget">
+	<form class="widget-search__form" role="search" method="get" action="https://google.com/search">
+		<label>
+			<input class="widget-search__field" type="search" placeholder="搜索..." value="" name="q" aria-label="搜索...">
+		</label>
+		<input class="widget-search__submit" type="submit" value="Search">
+		<input type="hidden" name="sitesearch" value="" />
+	</form>
+</div>
+<div class="widget-recent widget">
+	<h4 class="widget__title">近期文章</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_io_deploy/">本地部署kubernetes.io官方网站</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/reentrantlock/">Java互斥锁ReentrantLock实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/juc/">Java同步器框架AQS与锁实现原理</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/helm_design/">Helm架构与中心化部署解决方案</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/grpc/">使用Golang部署gRPC服务</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/protocol_buffers/">gRPC协议Protocol Buffers</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/kubernetes_curl_apiserver/">CURL探索Kubernetes API Server</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_optimize/">Harbor镜像构建流程优化</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/harbor_base/">开源Harbor功能结构</a></li>
+			<li class="widget__item"><a class="widget__link" href="/post/docker_login_pass/">Docker Login登录凭证安全存储</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-categories widget">
+	<h4 class="widget__title">分类</h4>
+	<div class="widget__content">
+		<ul class="widget__list">
+			<li class="widget__item"><a class="widget__link" href="/categories/docker">Docker</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/golang">Golang</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java">Java</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/java%e5%9f%ba%e7%a1%80%e7%ae%97%e6%b3%95">Java基础算法</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%8d%9a%e5%ae%a2%e7%bb%84%e4%bb%b6">博客组件</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e5%ae%b9%e5%99%a8%e7%94%9f%e6%80%81">容器生态</a></li>
+			<li class="widget__item"><a class="widget__link" href="/categories/%e7%94%9f%e6%b4%bb%e6%8a%80%e5%b7%a7">生活技巧</a></li>
+		</ul>
+	</div>
+</div>
+<div class="widget-taglist widget">
+	<h4 class="widget__title">标签</h4>
+	<div class="widget__content">
+		<a class="widget-taglist__link widget__link btn" href="/tags/aqs" title="Aqs">Aqs (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/chartmuseum" title="Chartmuseum">Chartmuseum (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/clair" title="Clair">Clair (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/condition" title="Condition">Condition (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/docker" title="Docker">Docker (12)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/golang" title="Golang">Golang (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/grpc" title="Grpc">Grpc (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/harbor" title="Harbor">Harbor (6)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/helm" title="Helm">Helm (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/hugo" title="Hugo">Hugo (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/java%e6%ba%90%e7%a0%81" title="Java源码">Java源码 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/juc" title="Juc">Juc (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/kubernetes" title="Kubernetes">Kubernetes (5)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/leader-elect" title="Leader elect">Leader elect (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/mysql" title="Mysql">Mysql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/overlay" title="Overlay">Overlay (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/postgresql" title="Postgresql">Postgresql (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/prometheus" title="Prometheus">Prometheus (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/swift" title="Swift">Swift (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/tiller" title="Tiller">Tiller (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/wordpress" title="Wordpress">Wordpress (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e4%ba%8c%e5%8f%89%e6%a0%91" title="二叉树">二叉树 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%85%89%e7%8c%ab" title="光猫">光猫 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%88%86%e4%ba%ab%e6%8f%92%e4%bb%b6" title="分享插件">分享插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8d%9a%e5%ae%a2%e6%8f%92%e4%bb%b6" title="博客插件">博客插件 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%8f%98%e5%bd%a2%e8%af%8d" title="变形词">变形词 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e5%85%b8%e6%a0%91" title="字典树">字典树 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e5%ad%97%e7%ac%a6%e4%b8%b2" title="字符串">字符串 (3)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e6%8d%ae%e7%bb%93%e6%9e%84" title="数据结构">数据结构 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e6%95%b0%e7%bb%84" title="数组">数组 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e7%ae%97%e6%b3%95" title="算法">算法 (4)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e8%af%84%e8%ae%ba%e7%b3%bb%e7%bb%9f" title="评论系统">评论系统 (1)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%94%81" title="锁">锁 (2)</a>
+		<a class="widget-taglist__link widget__link btn" href="/tags/%e9%95%9c%e5%83%8f%e6%89%ab%e6%8f%8f" title="镜像扫描">镜像扫描 (2)</a>
+	</div>
+</div>
+<div class="widget-social widget">
+	<h4 class="widget-social__title widget__title">社群</h4>
+	<div class="widget-social__content widget__content">
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="GitHub" rel="noopener noreferrer" href="https://github.com/kingfsen" target="_blank">
+				<svg class="widget-social__link-icon icon-github" viewBox="0 0 384 374" width="24" height="24" fill="#fff"><path d="m192 0c-106.1 0-192 85.8-192 191.7 0 84.7 55 156.6 131.3 181.9 9.6 1.8 13.1-4.2 13.1-9.2 0-4.6-.2-16.6-.3-32.6-53.4 11.6-64.7-25.7-64.7-25.7-8.7-22.1-21.3-28-21.3-28-17.4-11.9 1.3-11.6 1.3-11.6 19.3 1.4 29.4 19.8 29.4 19.8 17.1 29.3 44.9 20.8 55.9 15.9 1.7-12.4 6.7-20.8 12.2-25.6-42.6-4.8-87.5-21.3-87.5-94.8 0-20.9 7.5-38 19.8-51.4-2-4.9-8.6-24.3 1.9-50.7 0 0 16.1-5.2 52.8 19.7 15.3-4.2 31.7-6.4 48.1-6.5 16.3.1 32.7 2.2 48.1 6.5 36.7-24.8 52.8-19.7 52.8-19.7 10.5 26.4 3.9 45.9 1.9 50.7 12.3 13.4 19.7 30.5 19.7 51.4 0 73.7-44.9 89.9-87.7 94.6 6.9 5.9 13 17.6 13 35.5 0 25.6-.2 46.3-.2 52.6 0 5.1 3.5 11.1 13.2 9.2 76.2-25.5 131.2-97.3 131.2-182 0-105.9-86-191.7-192-191.7z"/></svg>
+				<span>GitHub</span>
+			</a>
+		</div>
+		<div class="widget-social__item widget__item">
+			<a class="widget-social__link widget__link btn" title="Email" href="mailto:562620163@qq.com">
+				<svg class="widget-social__link-icon icon-mail" viewBox="0 0 416 288" width="24" height="24" fill="#fff"><path d="m0 16v256 16h16 384 16v-16-256-16h-16-384-16zm347 16-139 92.5-139-92.5zm-148 125.5 9 5.5 9-5.5 167-111.5v210h-352v-210z"/></svg>
+				<span>562620163@qq.com</span>
+			</a>
+		</div>
+	</div>
+</div>
+</aside>
+		</div>
+		<footer class="footer">
+	<div class="container footer__container flex">
+		
+		<div class="footer__copyright">
+			&copy; 2022 .
+			<span class="footer__copyright-credits">使用 <a href="https://gohugo.io/" rel="nofollow noopener" target="_blank">Hugo</a> 技术与 <a href="https://github.com/kingfsen/Mainroad/" rel="nofollow noopener" target="_blank">Mainroad</a>主题</span>
+		</div>
+	</div>
+</footer>
+	</div>
+<script async defer src="/js/menu.js"></script>
+<script async src="/js/highlight.js"></script> 
+  <script>
+(function(){
+    var bp = document.createElement('script');
+    var curProtocol = window.location.protocol.split(':')[0];
+    if (curProtocol === 'https'){
+   bp.src = 'https://zz.bdstatic.com/linksubmit/push.js';
+  }
+  else{
+  bp.src = 'http://push.zhanzhang.baidu.com/push.js';
+  }
+    var s = document.getElementsByTagName("script")[0];
+    s.parentNode.insertBefore(bp, s);
+})();
+</script>
+
+
+ 
+  
+<script>
+var _hmt = _hmt || [];
+(function() {
+  var hm = document.createElement("script");
+  hm.src = "https://hm.baidu.com/hm.js?1f3ac79473dea8a6643d0e73a08fa809";
+  var s = document.getElementsByTagName("script")[0]; 
+  s.parentNode.insertBefore(hm, s);
+})();
+</script>
+
+
+
+<script type="text/javascript">
+    (function(){
+        $("pre code").parent().addClass("line-numbers")
+    }())
+</script>
+
+<a class="to-top" style="background-color:#666;color:#fff;width:40px;height:40px;text-align:center;padding-top:3px;line-height:18px;">返回顶部</a>
+<script type="text/javascript">
+$('.to-top').toTop();
+</script>
+
+</body>
+</html>

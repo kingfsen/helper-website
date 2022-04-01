@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>postgreSQL on </title>
+    <link>/tags/postgresql/</link>
+    <description>Recent content in postgreSQL on </description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>zh-cn</language>
+    <lastBuildDate>Tue, 02 Apr 2019 19:18:40 +0800</lastBuildDate>
+    
+	<atom:link href="/tags/postgresql/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>PostgreSQL命令行操作</title>
+      <link>/post/postgresql/</link>
+      <pubDate>Tue, 02 Apr 2019 19:18:40 +0800</pubDate>
+      
+      <guid>/post/postgresql/</guid>
+      <description>PostgreSQL是一个功能强大的开源对象关系数据库管理系统(ORDBMS)，PostgreSQL(也称为Post-gress-Q-L)由PostgreSQL全球开发集团(全球志愿者团队)开发， 其源代码是免费提供的。但是在中国互联网的后端数据库中，PostgreSQL目前使用的比较少，大</description>
+    </item>
+    
+  </channel>
+</rss>
